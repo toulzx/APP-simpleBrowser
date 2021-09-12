@@ -3,9 +3,10 @@
 Android APP
 
 > 本仓库现设置为私密状态，在本学期大作业提交截止日期之前，请勿与他人共享本仓库任何内容。
+> 
 > @toulzx 编辑
 
-项目成员： @toulzx @GodWuzZ @TangJoy0615
+项目成员： @toulzx  @GodWuzZ  @TangJoy0615
 
 ## Requirements
 
@@ -195,7 +196,7 @@ GitHub `Android browser` 关键字搜索，取 `Best match` 和 `Recent updated`
      - 无法打开
      - 体积大
 
-22. [jawaid-Ahmed/Leo-Browser](https://github.com/jawaid-Ahmed/Leo-Browser)
+22. [jawaid-Ahmed/Leo-Browser](https://github.com/jawai  d-Ahmed/Leo-Browser)
 
     - 注释少，代码规范良好
     - 体验一般，有 bugs
@@ -213,6 +214,6 @@ GitHub `Android browser` 关键字搜索，取 `Best match` 和 `Recent updated`
 - [Goverse/browser-android](https://github.com/Goverse/browser-android)
 
 
-## qita
+## 其它
 
 [Android Studio 之 Gradle 和 Gradle 插件的区别](https://blog.csdn.net/LVXIANGAN/article/details/)
