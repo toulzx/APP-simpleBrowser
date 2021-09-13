@@ -8,6 +8,12 @@ Android APP
 
 项目成员： @toulzx  @GodWuzZ  @TangJoy0615
 
+## Tips
+
+### Version
+
+
+
 ## Requirements
 
 ### Mandatory

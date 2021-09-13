@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/bottom_height"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/img_view_back"
+        android:src="@mipmap/back"
+        android:scaleType="centerInside"
+        android:layout_width="@dimen/image_button_dimen"
+        android:layout_height="@dimen/image_button_dimen"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/img_view_forward"/>
+
+    <ImageView
+        android:id="@+id/img_view_forward"
+        android:src="@mipmap/forward"
+        android:scaleType="centerInside"
+        android:layout_width="@dimen/image_button_dimen"
+        android:layout_height="@dimen/image_button_dimen"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/img_view_back"
+        app:layout_constraintRight_toLeftOf="@+id/img_view_options" />
+
+    <ImageView
+        android:id="@+id/img_view_options"
+        android:src="@mipmap/options"
+        android:scaleType="centerInside"
+        android:layout_width="@dimen/image_button_dimen"
+        android:layout_height="@dimen/image_button_dimen"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/img_view_forward"
+        app:layout_constraintRight_toLeftOf="@id/img_view_records"/>
+
+    <ImageView
+        android:id="@+id/img_view_records"
+        android:src="@mipmap/records"
+        android:scaleType="centerInside"
+        android:layout_width="@dimen/image_button_dimen"
+        android:layout_height="@dimen/image_button_dimen"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/img_view_options"
+        app:layout_constraintRight_toLeftOf="@id/img_view_pages"/>
+
+    <ImageView
+        android:id="@+id/img_view_pages"
+        android:src="@mipmap/pages"
+        android:scaleType="centerInside"
+        android:layout_width="@dimen/image_button_dimen"
+        android:layout_height="@dimen/image_button_dimen"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/img_view_records"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

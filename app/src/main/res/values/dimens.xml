@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="top_height"> 40dp </dimen>
+    <dimen name="edit_text_height"> 50dp </dimen>
+    <dimen name="image_button_dimen"> 25dp </dimen>
+    <dimen name="bottom_height"> 60dp </dimen>
+    
+</resources>
