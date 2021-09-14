@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="top_height"> 40dp </dimen>
+    <dimen name="top_height"> 50dp </dimen>
+    <dimen name="bottom_height"> 55dp </dimen>
+    <dimen name="layout_search_margin"> 8dp </dimen>
+    <dimen name="layout_search_padding"> 8dp </dimen>
     <dimen name="edit_text_height"> 50dp </dimen>
-    <dimen name="image_button_dimen"> 25dp </dimen>
-    <dimen name="bottom_height"> 60dp </dimen>
+    <dimen name="edit_text_size"> 15sp </dimen>
+    <dimen name="image_view_header_dimen"> 20dp </dimen>
+    <dimen name="image_view_footer_dimen"> 25dp </dimen>
+    <dimen name="progress_bar_height"> 2dp </dimen>
     
 </resources>

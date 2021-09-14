@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true">
 
     <fragment
-        android:id="@+id/fragment_top"
+        android:id="@+id/fragment_header"
         android:name="cn.njupt.assignment.tou.fragment.topFragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_height"
@@ -23,13 +23,13 @@
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/top_height"
         android:layout_marginBottom="@dimen/bottom_height"
-        app:layout_constraintTop_toBottomOf="@id/fragment_top"
-        app:layout_constraintBottom_toTopOf="@id/fragment_bottom"
+        app:layout_constraintTop_toBottomOf="@id/fragment_header"
+        app:layout_constraintBottom_toTopOf="@id/fragment_footer"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
     <fragment
-        android:id="@+id/fragment_bottom"
+        android:id="@+id/fragment_footer"
         android:name="cn.njupt.assignment.tou.fragment.bottomFragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_height"

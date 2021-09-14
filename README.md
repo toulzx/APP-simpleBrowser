@@ -12,7 +12,21 @@ Android APP
 
 ### Version
 
+Android Studio Arctic Fox (2021-03)
 
+#### compileOptions
+
+`sourceCompatibility JavaVersion.VERSION_11`
+
+`targetCompatibility JavaVersion.VERSION_11`
+
+#### distribution
+
+`distributionUrl = https\://services.gradle.org/distributions/gradle-7.0.2-bin.zip`
+
+#### dependencies
+
+`com.android.tools.build:gradle:7.0.2`
 
 ## Requirements
 

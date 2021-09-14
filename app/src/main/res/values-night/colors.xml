@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="edit_text_color">#FF000000</color>
+    <color name="edit_text_color_hint">#FF908f90</color>
+    <color name="layout_background">#FF000000</color>
+
+</resources>

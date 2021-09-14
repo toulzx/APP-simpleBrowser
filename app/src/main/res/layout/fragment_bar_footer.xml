@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/bottom_height"
-    android:background="@color/white">
+    android:background="@color/layout_background">
 
     <ImageView
         android:id="@+id/img_view_back"
-        android:src="@mipmap/back"
+        android:src="@drawable/btn_back"
         android:scaleType="centerInside"
-        android:layout_width="@dimen/image_button_dimen"
-        android:layout_height="@dimen/image_button_dimen"
+        android:layout_width="@dimen/image_view_footer_dimen"
+        android:layout_height="@dimen/image_view_footer_dimen"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -19,10 +19,10 @@
 
     <ImageView
         android:id="@+id/img_view_forward"
-        android:src="@mipmap/forward"
+        android:src="@drawable/btn_forward"
         android:scaleType="centerInside"
-        android:layout_width="@dimen/image_button_dimen"
-        android:layout_height="@dimen/image_button_dimen"
+        android:layout_width="@dimen/image_view_footer_dimen"
+        android:layout_height="@dimen/image_view_footer_dimen"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/img_view_back"
@@ -30,10 +30,10 @@
 
     <ImageView
         android:id="@+id/img_view_options"
-        android:src="@mipmap/options"
+        android:src="@drawable/btn_options"
         android:scaleType="centerInside"
-        android:layout_width="@dimen/image_button_dimen"
-        android:layout_height="@dimen/image_button_dimen"
+        android:layout_width="@dimen/image_view_footer_dimen"
+        android:layout_height="@dimen/image_view_footer_dimen"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/img_view_forward"
@@ -41,10 +41,10 @@
 
     <ImageView
         android:id="@+id/img_view_records"
-        android:src="@mipmap/records"
+        android:src="@drawable/btn_records"
         android:scaleType="centerInside"
-        android:layout_width="@dimen/image_button_dimen"
-        android:layout_height="@dimen/image_button_dimen"
+        android:layout_width="@dimen/image_view_footer_dimen"
+        android:layout_height="@dimen/image_view_footer_dimen"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/img_view_options"
@@ -52,10 +52,10 @@
 
     <ImageView
         android:id="@+id/img_view_pages"
-        android:src="@mipmap/pages"
+        android:src="@drawable/btn_pages"
         android:scaleType="centerInside"
-        android:layout_width="@dimen/image_button_dimen"
-        android:layout_height="@dimen/image_button_dimen"
+        android:layout_width="@dimen/image_view_footer_dimen"
+        android:layout_height="@dimen/image_view_footer_dimen"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/img_view_records"
