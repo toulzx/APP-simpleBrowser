@@ -2,17 +2,21 @@ package cn.njupt.assignment.tou.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -24,18 +28,30 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import cn.njupt.assignment.tou.R;
+import cn.njupt.assignment.tou.base.sGestureListener;
+import cn.njupt.assignment.tou.fragment.footerFragment;
+import cn.njupt.assignment.tou.fragment.headerFragment;
 
-public class HomeActivity extends AppCompatActivity implements View.OnClickListener{
+public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private final Context mContext = this;
+    private final static String TAG = HomeActivity.class.getSimpleName();
 
     private WebView mWebView;
     private EditText mSearch;
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
+
+    private footerFragment mFooter;
+    private headerFragment mHeader;
+
+    FragmentManager mFragmentManager = getSupportFragmentManager();
+
+    private Context mContext;
+    private GestureDetector mDetector;
+    private InputMethodManager inputMethodManager;
 
     private long exitTime = 0;
     private static final int PRESS_BACK_EXIT_GAP = 2000;
@@ -48,6 +64,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        mContext = this;
+        mDetector = new GestureDetector(this, onWebViewGestureListener);
+        inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
         initUI();
 
@@ -70,12 +90,55 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         super.onNightModeChanged(mode);
     }
 
+
+    /**
+     * 用来监听 WebView 的手势
+     * 实例化类
+     * @date 2021/9/22 2:06
+     * @author tou
+     */
+    private final sGestureListener onWebViewGestureListener = new sGestureListener() {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            float x = e2.getX() - e1.getX();
+            float y = e2.getY() - e1.getY();
+            judgeSwiperDirection(x, y);
+            return true;
+        }
+    };
+
+
+    /**
+     * 系统返回键 绑定 webView 后退操作
+     *
+     * @return void
+     * @date 2021/9/14 17:27
+     * @author tou
+     */
+    @Override
+    public void onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+        } else {
+            if ((System.currentTimeMillis() - exitTime) > PRESS_BACK_EXIT_GAP) {
+                // 连点两次退出程序
+                Toast.makeText(mContext, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                super.onBackPressed();
+            }
+
+        }
+    }
+
+
+
     /*---------------------------------------------------1-----------------------------------------------------------*/
 
     /**
-     * 初始化控件（绑定与链接）
+     * 初始化控件：绑定与监听
      * @return void
-     * @date 2021/9/13 17:31
+     * @date 2021/9/15
      * @author tou
      */
     private void initUI() {
@@ -92,6 +155,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mOptions = findViewById(R.id.img_view_options);
         mRecords = findViewById(R.id.img_view_records);
         mPages = findViewById(R.id.img_view_pages);
+
+        mFooter =  (footerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_footer);
+        mHeader =  (headerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_header);
 
         mResize.setOnClickListener(this);
         mReload.setOnClickListener(this);
@@ -148,12 +214,19 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * @date 2021/9/14 17:38
      * @author tou
      */
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     private void initWebView() {
 
         /* 使用重写的 WebViewClient 和 WebChromeClient */
         mWebView.setWebViewClient(new sWebViewClient(){});
         mWebView.setWebChromeClient(new sWebChromeClient(){});
+
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mDetector.onTouchEvent(event);
+            }
+        });
 
         /* 设置 */
         WebSettings settings = mWebView.getSettings();
@@ -195,6 +268,34 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    /**
+     * 判断左滑右滑
+     * @param xAxis X轴滑动距离
+     * @param yAxis Y轴滑动距离
+     * @date 2021/9/22 2:34
+     * @author tou
+     */
+    private void judgeSwiperDirection(float xAxis, float yAxis) {
+
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+        /* 避免和点击事件冲突 */
+        if (yAxis > 25) {
+//            Log.i(TAG, "judgeSwiperDirection:下滑触发" + " yAxis=" + yAxis);
+            fragmentTransaction.show(mFooter);
+            fragmentTransaction.show(mHeader);
+
+        } else {
+//            Log.i(TAG, "judgeSwiperDirection:上滑触发" + " yAxis=" + yAxis);
+            fragmentTransaction.hide(mFooter);
+            fragmentTransaction.hide(mHeader);
+        }
+
+        fragmentTransaction.commit();      // 提交！
+
+    }
+
+
     /*---------------------------------------------------2-----------------------------------------------------------*/
 
     /**
@@ -210,13 +311,47 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         int id = v.getId();
 
+        /* 判断点击事件的触发者，选择对应触发内容 */
+
         if (id == R.id.img_view_resize) {
-            // TODO
-            Toast.makeText(mContext, "resize 功能开发中", Toast.LENGTH_SHORT).show();
+
+            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+            if (mFooter.isHidden() || mHeader.isHidden()) {
+                fragmentTransaction.show(mFooter);
+                fragmentTransaction.show(mHeader);
+            } else {
+                fragmentTransaction.hide(mFooter);
+                fragmentTransaction.hide(mHeader);
+            }
+            fragmentTransaction.commit();      // 提交！
 
         } else if (id == R.id.img_view_reload) {
 
-            mWebView.reload();
+            /* 通过搜索栏是否聚焦判断是搜索还是刷新 */
+
+            if (mSearch.hasFocus()) {
+
+                if (inputMethodManager.isActive()) inputMethodManager.hideSoftInputFromWindow(mSearch.getApplicationWindowToken(), 0);
+
+                String strInput = mSearch.getText().toString();
+
+                if (!isUrl(strInput)) {
+
+                    try { mWebView.loadUrl(getSearchEngineUrl() + URLEncoder.encode(strInput,"utf-8")); }
+                    catch (UnsupportedEncodingException e) { e.printStackTrace(); }
+
+                } else {
+
+                    mWebView.loadUrl(strInput);
+
+                }
+
+            } else {
+
+                mWebView.reload();
+
+            }
 
         } else if (id == R.id.img_view_back) {
 
@@ -242,6 +377,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
     /**
      * 重写 WebViewClient
      * @date 2021/9/14
@@ -251,6 +387,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         /**
          * 使用 webView 加载网页，而不调用外部浏览器
+         * TODO: 404 处理
+         * TODO:调用第三方应用前try-catch可靠性
+         * TODO:调用第三方应用前弹窗提示用户，允许后再调用
          * @param view:
          * @param request:
          * @return boolean
@@ -262,17 +401,14 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             String url = request.getUrl().toString();
 
-            // TODO: 404 处理
-
             // 正常的内容，打开
             if (url.startsWith(HTTP) || url.startsWith(HTTPS)) {
                 view.loadUrl(url);
                 return true;
             }
 
-            // 调用第三方应用时，如果手机上没有安装处理某个scheme开头的url的APP, 会导致crash TODO:可靠性？
+            // 调用第三方应用时，如果手机上没有安装处理某个scheme开头的url的APP, 会导致crash
             try {
-                // TODO:弹窗提示用户，允许后再调用
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(intent);
                 return true;
@@ -281,6 +417,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         }
+
 
         /**
          * 当页面开始加载时，显示加载进度
@@ -299,17 +436,21 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             mProgressBar.setProgress(0);
             mProgressBar.setVisibility(View.VISIBLE);
 
-            // 更新状态文字   TODO: 这里可以按 Safari 来，不做改变
+            // 更新状态文字
             mSearch.setText(getResources().getText(R.string.loading_hint));
 
         }
 
+
+
+
         /**
          * 当页面加载完毕，修改页面标题
-         * @param view:
-         * @param url:
+         * @param view The WebView that is initiating the callback.
+         * @param url  The url of the page.
          * @return void
          * @date 2021/9/14 20:07
+         * @author tou
          */
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -321,7 +462,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             mSearch.setText(mWebView.getTitle());
 
         }
+
+
     }
+
 
 
     /**
@@ -389,31 +533,42 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 //            setTitle(title);
             mSearch.setText(title);
         }
+
+
+
     }
 
 
     /*---------------------------------------------------2-----------------------------------------------------------*/
 
     /**
-     * 系统返回键 绑定 webView 后退操作
-     * @return void
-     * @date 2021/9/14 17:27
+     * 判断是否是网页链接
+     * TODO:已委托大宇 0915
+     * TODO:进阶；判断是否是网址简写
+     * @param strInput: 用户在搜索栏输入的内容
+     * @return boolean
+     * @date 2021/9/15 19:17
      * @author tou
      */
-    @Override
-    public void onBackPressed() {
-        if (mWebView.canGoBack()) {
-            mWebView.goBack();
-        } else {
-            if ((System.currentTimeMillis() - exitTime) > PRESS_BACK_EXIT_GAP) {
-                // 连点两次退出程序
-                Toast.makeText(mContext, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-                exitTime = System.currentTimeMillis();
-            } else {
-                super.onBackPressed();
-            }
+    private boolean isUrl(String strInput) {
 
-        }
+        return false;
+
     }
+
+    /**
+     * 预留接口：判断用户使用的搜索引擎
+     * TODO: 自定义搜索引擎
+     * @return java.lang.String
+     * @date 2021/9/15 19:16
+     * @author tou
+     */
+    private String getSearchEngineUrl() {
+
+        return getResources().getString(R.string.search_engine_baidu_url);
+
+    }
+
+
 }
 

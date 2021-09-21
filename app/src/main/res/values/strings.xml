@@ -4,4 +4,12 @@
     <string name="user_agent_detail">Safari In Android Designed By @toulzx</string>
     <string name="loading_hint">loading</string>
     <string name="edit_text_hint">搜索或输入网站名称</string>
+    
+    <string name="search_engine_baidu_url">https://www.baidu.com/s?wd=</string>
+    <string name="search_engine_google_url">https://www.google.com.hk/search?hl=zh-CN&amp;q=</string>
+    <string name="search_engine_bing_url">https://cn.bing.com/search?q=</string>
+    <string name="search_engine_sougou_url">http://www.sogou.com/sogou?query=</string>
+    <string name="search_engine_github_url">https://github.com/search?q=</string>
+
+
 </resources>
