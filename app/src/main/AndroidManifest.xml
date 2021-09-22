@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="cn.njupt.assignment.tou">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,6 +14,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".activity.HomeActivity"
+            android:screenOrientation="unspecified"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

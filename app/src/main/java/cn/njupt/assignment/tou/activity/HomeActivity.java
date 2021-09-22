@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -59,6 +60,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private static final String HTTP = "http://";
     private static final String HTTPS = "https://";
 
+    private static final int SCREEN_ORIENTATION_LANDSCAPE = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    private static final int SCREEN_ORIENTATION_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    private static final int SCREEN_ORIENTATION_UNSPECIFIED = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -566,6 +572,30 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private String getSearchEngineUrl() {
 
         return getResources().getString(R.string.search_engine_baidu_url);
+
+    }
+
+    /**
+     * 预留接口：设置屏幕方向
+     * TODO: 设置页
+     * @return void
+     * @date 2021/9/22 11:07
+     * @author tou
+     */
+    @SuppressLint("SourceLockedOrientationActivity")
+    private void setScreenOrientation(int id) {
+
+        switch (id) {
+            case SCREEN_ORIENTATION_LANDSCAPE:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//设置屏幕为横屏, 锁定方向
+                break;
+            case SCREEN_ORIENTATION_PORTRAIT:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//设置屏幕为竖屏, 锁定方向
+                break;
+            case SCREEN_ORIENTATION_UNSPECIFIED:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);//放弃锁定方向
+                break;
+        }
 
     }
 
