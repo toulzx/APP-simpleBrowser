@@ -12,9 +12,8 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.GestureDetector;
+import android.os.Environment;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -28,11 +27,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.base.sGestureListener;
+import cn.njupt.assignment.tou.base.sWebView;
 import cn.njupt.assignment.tou.fragment.footerFragment;
 import cn.njupt.assignment.tou.fragment.headerFragment;
 
@@ -40,7 +40,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     private final static String TAG = HomeActivity.class.getSimpleName();
 
-    private WebView mWebView;
+    private sWebView mWebView;
     private EditText mSearch;
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
@@ -51,7 +51,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     FragmentManager mFragmentManager = getSupportFragmentManager();
 
     private Context mContext;
-    private GestureDetector mDetector;
     private InputMethodManager inputMethodManager;
 
     private long exitTime = 0;
@@ -64,6 +63,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private static final int SCREEN_ORIENTATION_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     private static final int SCREEN_ORIENTATION_UNSPECIFIED = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
+    private static final int ALLOW_IMAGE_LOADED = 1;
+    private static final int PROHIBIT_IMAGE_LOADED = 0;
+
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_home);
 
         mContext = this;
-        mDetector = new GestureDetector(this, onWebViewGestureListener);
         inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
         initUI();
@@ -96,22 +97,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         super.onNightModeChanged(mode);
     }
 
-
-    /**
-     * 用来监听 WebView 的手势
-     * 实例化类
-     * @date 2021/9/22 2:06
-     * @author tou
-     */
-    private final sGestureListener onWebViewGestureListener = new sGestureListener() {
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            float x = e2.getX() - e1.getX();
-            float y = e2.getY() - e1.getY();
-            judgeSwiperDirection(x, y);
-            return true;
-        }
-    };
 
 
     /**
@@ -147,6 +132,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * @date 2021/9/15
      * @author tou
      */
+
+    @SuppressLint("ClickableViewAccessibility")
     private void initUI() {
 
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);        // 状态栏透明
@@ -172,6 +159,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mOptions.setOnClickListener(this);
         mRecords.setOnClickListener(this);
         mPages.setOnClickListener(this);
+
 
         // 地址输入栏获取与失去焦点处理
         mSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -220,19 +208,37 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * @date 2021/9/14 17:38
      * @author tou
      */
-    @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
+    @SuppressLint({"SetJavaScriptEnabled"})
     private void initWebView() {
 
         /* 使用重写的 WebViewClient 和 WebChromeClient */
         mWebView.setWebViewClient(new sWebViewClient(){});
         mWebView.setWebChromeClient(new sWebChromeClient(){});
 
-        mWebView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return mDetector.onTouchEvent(event);
+        mWebView.setOnScrollChangedCallback(new sWebView.OnScrollChangedCallback(){
+            public void onScroll(int dx, int dy){
+                //这里我们根据dx和dy参数做自己想做的事情
+
+                FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+                if (dy > 25) {
+
+                    fragmentTransaction.hide(mFooter);
+                    fragmentTransaction.hide(mHeader);
+
+
+                } else if ( dy < -25 ) {
+
+                    fragmentTransaction.show(mFooter);
+                    fragmentTransaction.show(mHeader);
+
+                }
+
+                fragmentTransaction.commit();
+
             }
         });
+
 
         /* 设置 */
         WebSettings settings = mWebView.getSettings();
@@ -241,6 +247,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         settings.setDefaultTextEncodingName("utf-8");
         // 设置浏览器 UserAgent
         settings.setUserAgentString(settings.getUserAgentString() + "; " + getResources().getString(R.string.user_agent_detail));
+//        settings.setUserAgentString("Android");
 
         // 启用 js 功能
         settings.setJavaScriptEnabled(true);
@@ -249,8 +256,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         // 使用网页元标记中定义的属性加载 WebView
         settings.setUseWideViewPort(true);
-        // 缩放至屏幕的大小
-        settings.setLoadWithOverviewMode(true);
 
         // 支持缩放，默认为true。是下面那个的前提。
         settings.setSupportZoom(true);
@@ -258,46 +263,30 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         settings.setBuiltInZoomControls(true);
         // 隐藏原生的缩放控件
         settings.setDisplayZoomControls(false);
-
+        // 缩放至屏幕的大小
+        settings.setLoadWithOverviewMode(true);
 
         // 设置可以访问文件
         settings.setAllowFileAccess(true);
         // 启用本地缓存
         settings.setDomStorageEnabled(true);
-        // 支持自动加载图片 TODO: set it optional
+        settings.setAppCacheEnabled(true);      // 不推荐使用？弃用？
+        // 设置缓存文件路径
+        String appCacheDir = this.getBaseContext().getCacheDir().getAbsolutePath(); // /data/user/0/cn.njupt.assignment.tou/cache
+//        String appCacheDir = this.getApplicationContext().getDir("cache", Context.MODE_PRIVATE).getPath();    // /data/user/0/cn.njupt.assignment.tou/app_cache
+        settings.setAppCachePath(appCacheDir);
+        // 设置缓存模式
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+
+        // 启用自动加载图片
         settings.setLoadsImagesAutomatically(true);
+        settings.setBlockNetworkImage(false);
+
         // HTTP与HTTPS混合加载模式（注：application 中需启用 android:usesCleartextTraffic="true"）
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         // 加载首页
         mWebView.loadUrl(getResources().getString(R.string.home_url));
-
-    }
-
-    /**
-     * 判断左滑右滑
-     * @param xAxis X轴滑动距离
-     * @param yAxis Y轴滑动距离
-     * @date 2021/9/22 2:34
-     * @author tou
-     */
-    private void judgeSwiperDirection(float xAxis, float yAxis) {
-
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
-        /* 避免和点击事件冲突 */
-        if (yAxis > 25) {
-//            Log.i(TAG, "judgeSwiperDirection:下滑触发" + " yAxis=" + yAxis);
-            fragmentTransaction.show(mFooter);
-            fragmentTransaction.show(mHeader);
-
-        } else {
-//            Log.i(TAG, "judgeSwiperDirection:上滑触发" + " yAxis=" + yAxis);
-            fragmentTransaction.hide(mFooter);
-            fragmentTransaction.hide(mHeader);
-        }
-
-        fragmentTransaction.commit();      // 提交！
 
     }
 
@@ -426,7 +415,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
 
         /**
-         * 当页面开始加载时，显示加载进度
+         * 当页面开始加载时
+         * 显示加载进度
          * @param view:
          * @param url:
          * @param favicon:
@@ -451,21 +441,26 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
 
         /**
-         * 当页面加载完毕，修改页面标题
-         * @param view The WebView that is initiating the callback.
+         * 当页面加载完毕
+         * 修改页面标题
+         * @param webView The WebView that is initiating the callback.
          * @param url  The url of the page.
          * @return void
          * @date 2021/9/14 20:07
          * @author tou
          */
         @Override
-        public void onPageFinished(WebView view, String url) {
+        public void onPageFinished(WebView webView, String url) {
 
-            super.onPageFinished(view, url);
+            super.onPageFinished(webView, url);
 
             mProgressBar.setVisibility(View.INVISIBLE);
             setTitle(mWebView.getTitle());
             mSearch.setText(mWebView.getTitle());
+
+            String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
+                    + File.separator + System.currentTimeMillis() + ".xml";
+            mWebView.saveWebArchive(cacheFileName);
 
         }
 
@@ -481,29 +476,37 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      */
     private class sWebChromeClient extends WebChromeClient {
 
+        private int lastProgress = 0;
         private final static int WEB_PROGRESS_MAX = 100;
 
         /**
+         * 当加载进度改变时：
          * 刷新时更新进度条
-         * @param view:
+         * @param webView:
          * @param newProgress:
          * @return void
          * @date 2021/9/14 20:11
          * @author tou
          */
         @Override
-        public void onProgressChanged(WebView view, int newProgress) {
+        public void onProgressChanged(WebView webView, int newProgress) {
 
-            super.onProgressChanged(view, newProgress);
+            super.onProgressChanged(webView, newProgress);
 
             mProgressBar.setProgress(newProgress);
-
             if (newProgress > 0) {
                 if (newProgress == WEB_PROGRESS_MAX) {
                     mProgressBar.setVisibility(View.INVISIBLE);
                 } else {
                     mProgressBar.setVisibility(View.VISIBLE);
                 }
+            }
+
+            if ( lastProgress != WEB_PROGRESS_MAX && newProgress == WEB_PROGRESS_MAX ) {
+                lastProgress = newProgress;
+//                String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
+//                        + File.separator + System.currentTimeMillis() + ".mht";
+//                webView.saveWebArchive(cacheFileName);
             }
 
         }
@@ -540,8 +543,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             mSearch.setText(title);
         }
 
-
-
     }
 
 
@@ -577,15 +578,15 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 预留接口：设置屏幕方向
-     * TODO: 设置页
+     * TODO: 设置页调用
      * @return void
      * @date 2021/9/22 11:07
      * @author tou
      */
     @SuppressLint("SourceLockedOrientationActivity")
-    private void setScreenOrientation(int id) {
+    private void setScreenOrientation(int flag) {
 
-        switch (id) {
+        switch (flag) {
             case SCREEN_ORIENTATION_LANDSCAPE:
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//设置屏幕为横屏, 锁定方向
                 break;
@@ -594,6 +595,31 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case SCREEN_ORIENTATION_UNSPECIFIED:
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);//放弃锁定方向
+                break;
+        }
+
+    }
+
+    /**
+     * 预留接口：设置是否自动加载图片
+     * 注意 setLoadsImagesAutomatically 必须始终允许，它关联的不仅是网页上的图片。
+     * TODO: 设置页调用
+     * @param flag:
+     * @param webSettings:
+     * @return void
+     * @date 2021/9/22 15:01
+     * @author tou
+     */
+    private void setImageBlock(int flag, WebSettings webSettings) {
+
+        switch (flag) {
+            case ALLOW_IMAGE_LOADED:
+                webSettings.setLoadsImagesAutomatically(true);
+                webSettings.setBlockNetworkImage(false);
+                break;
+            case PROHIBIT_IMAGE_LOADED:
+                webSettings.setLoadsImagesAutomatically(true);
+                webSettings.setBlockNetworkImage(true);
                 break;
         }
 
