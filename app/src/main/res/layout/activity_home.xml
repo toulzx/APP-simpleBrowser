@@ -8,29 +8,27 @@
     tools:context=".activity.HomeActivity"
     android:fitsSystemWindows="true">
 
+    <cn.njupt.assignment.tou.base.sWebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_header"
+        app:layout_constraintBottom_toBottomOf="@id/fragment_footer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
     <fragment
         android:id="@+id/fragment_header"
-        android:name="cn.njupt.assignment.tou.fragment.topFragment"
+        android:name="cn.njupt.assignment.tou.fragment.headerFragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_height"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
-    <WebView
-        android:id="@+id/web_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/top_height"
-        android:layout_marginBottom="@dimen/bottom_height"
-        app:layout_constraintTop_toBottomOf="@id/fragment_header"
-        app:layout_constraintBottom_toTopOf="@id/fragment_footer"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-
     <fragment
         android:id="@+id/fragment_footer"
-        android:name="cn.njupt.assignment.tou.fragment.bottomFragment"
+        android:name="cn.njupt.assignment.tou.fragment.footerFragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_height"
         app:layout_constraintBottom_toBottomOf="parent"

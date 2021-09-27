@@ -216,7 +216,7 @@ GitHub `Android browser` 关键字搜索，取 `Best match` 和 `Recent updated`
      - 无法打开
      - 体积大
 
-22. [jawaid-Ahmed/Leo-Browser](https://github.com/jawai  d-Ahmed/Leo-Browser)
+22. [jawaid-Ahmed/Leo-Browser](https://github.com/jawaid-Ahmed/Leo-Browser)
 
     - 注释少，代码规范良好
     - 体验一般，有 bugs
