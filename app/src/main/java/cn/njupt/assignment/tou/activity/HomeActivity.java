@@ -362,7 +362,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         } else if (id == R.id.img_view_records) {
             // TODO
+            System.out.println("records");
             Toast.makeText(mContext, "records 功能开发中", Toast.LENGTH_SHORT).show();
+            /*午 测试*/
+            Intent intent=new Intent(HomeActivity.this, DemoActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.img_view_pages) {
             // TODO

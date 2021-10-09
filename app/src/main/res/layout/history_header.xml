@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="35dp"
+    >
+
+    <TextView
+        android:id="@+id/history_today_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#8076a3"
+        android:text="清楚今天记录"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp"
+        android:paddingTop="10dp"
+        />
+    <TextView
+        android:id="@+id/delete_today_history"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:text="删除"
+        android:textSize="15sp"
+        android:textColor="#ee3f4d"
+        android:paddingTop="10dp"
+        android:visibility="gone"
+        />
+
+
+</RelativeLayout>
