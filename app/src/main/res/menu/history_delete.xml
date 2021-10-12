@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/removeItem"
+        android:title="删除本记录"
+        app:showAsAction="never"
+        android:orderInCategory="100"
+        />
+
+    <item
+        android:id="@+id/historyCopyItem"
+        android:title="复制链接"
+        app:showAsAction="never"
+        android:orderInCategory="101"
+        />
+</menu>

@@ -14,10 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.entity.HistoryList;
@@ -28,10 +26,10 @@ import cn.njupt.assignment.tou.entity.HistoryRecord;
  * @date: 2021/10/8
  * @description: 作为demo的adapter
  */
-public class DemoAdapter extends SectionedRecyclerViewAdapter<
-        DemoAdapter.HistoryHeaderViewHolder,
-        DemoAdapter.HistoryHolder,
-        DemoAdapter.HistoryFooterViewHolder> {
+public class HistoryAdapter extends SectionedRecyclerViewAdapter<
+        HistoryAdapter.HistoryHeaderViewHolder,
+        HistoryAdapter.HistoryHolder,
+        HistoryAdapter.HistoryFooterViewHolder> {
 
     static class HistoryHolder extends RecyclerView.ViewHolder{
         //显示item部分
@@ -54,11 +52,9 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
     static class HistoryHeaderViewHolder extends RecyclerView.ViewHolder{
 
         private final TextView time;
-        private final TextView deleteRecordOfDay;
         public HistoryHeaderViewHolder(@NonNull View itemView) {
             super(itemView);
             time = itemView.findViewById(R.id.history_today_time);
-            deleteRecordOfDay = itemView.findViewById(R.id.delete_today_history);
         }
     }
 
@@ -71,6 +67,14 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
         }
     }
 
+    public interface OnItemLongClickListener{
+        void onItemLongClick(View view , int position);
+    }
+
+    public interface OnItemClickListener{
+        void onItemClick(View view , int section , int position);
+    }
+
 
     private List<HistoryRecord> historyRecords;
 
@@ -78,12 +82,17 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
 
     Context context;    /*上下文*/
 
-    public DemoAdapter(Context context){
+    private OnItemLongClickListener onItemLongClickListener;    /*配置长按事件*/
+
+    private OnItemClickListener onItemClickListener;    /*配置点击事件*/
+
+    private List<Integer> listOfDelete = new LinkedList<>();
+
+    public HistoryAdapter(Context context){
         this.context = context;
     }
 
-    public DemoAdapter(Context context, List<HistoryList> allRecords){
-        Log.i("DemoAdapter", "DemoAdapter: start");
+    public HistoryAdapter(Context context, List<HistoryList> allRecords){
         this.context = context;
         this.allRecords = allRecords;
     }
@@ -94,6 +103,27 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
 
     public void setHistoryRecords(List<HistoryRecord> historyRecords) {
         this.historyRecords = historyRecords;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
+    public void setListOfDelete(List<Integer> listOfDelete) {
+        this.listOfDelete = listOfDelete;
+    }
+
+    public List<Integer> getListOfDelete(){
+        return this.listOfDelete;
+    }
+
+    public void init(){
+        listOfDelete.clear();
+        this.notifyDataSetChanged();
     }
 
     @NonNull
@@ -129,7 +159,7 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
     @Override
     protected void onBindSectionFooterViewHolder(HistoryFooterViewHolder holder, int section) {
         //放删除按钮，删除按钮的值是历史是时间
-        holder.deleteRecordOfToday.setText(allRecords.get(section).getTime());
+        holder.deleteRecordOfToday.setText("删除"+allRecords.get(section).getTime()+"的记录");
     }
 
     @Override
@@ -145,11 +175,24 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
         holder.id.setText(String.valueOf(bean.getId()));
         holder.time.setText(bean.getHdate());
 
+        //点击事件
+        if (onItemClickListener != null) {
+            holder.itemView.setOnClickListener(v -> {
+                onItemClickListener.onItemClick(holder.itemView, section, position);
+            });
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
+        //长按事件
+        if(onItemLongClickListener!=null) {
+            holder.itemView.setOnLongClickListener(v -> {
+                onItemLongClickListener.onItemLongClick(holder.itemView,position);
+                return false;
+            });
+        }
     }
 
     @Override

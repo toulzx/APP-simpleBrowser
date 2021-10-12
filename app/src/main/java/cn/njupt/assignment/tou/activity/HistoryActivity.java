@@ -7,8 +7,17 @@ import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,29 +25,30 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.adapter.DemoAdapter;
+import cn.njupt.assignment.tou.adapter.HistoryAdapter;
 import cn.njupt.assignment.tou.entity.HistoryList;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
 import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
-public class DemoActivity extends AppCompatActivity {
-    private final static String TAG = DemoActivity.class.getSimpleName();
+public class HistoryActivity extends AppCompatActivity {
+    private final static String TAG = HistoryActivity.class.getSimpleName();
 
     HistoryRecordViewModel historyRecordViewModel;
     RecyclerView recyclerView;
     LinearLayoutManager linearLayoutManager;    /*集合显示控件recyclerview的管理器*/
+    HistoryAdapter historyAdapter;  /*控件recyclerview的适配器*/
 
-    DemoAdapter historyAdapter;  /*控件recyclerview的适配器*/
+    Button buttonOfHistoryEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
-        setContentView(R.layout.history_demo);
+        setContentView(R.layout.activity_history);
         recyclerView = findViewById(R.id.list_history);
+        buttonOfHistoryEdit = findViewById(R.id.button_clear_history);
 
         initData();
         //添加RecyclerView管理器
@@ -47,8 +57,7 @@ public class DemoActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
 
         //添加适配器
-        Log.i(TAG, sortForList(historyRecordViewModel.getAll()).get(0).getTime());
-        historyAdapter = new DemoAdapter(this,sortForList(historyRecordViewModel.getAll()));
+        historyAdapter = new HistoryAdapter(this,sortForList(historyRecordViewModel.getAll()));
         recyclerView.setAdapter(historyAdapter);
 
         //实时更新recycler view的状态并展示出来
@@ -60,9 +69,103 @@ public class DemoActivity extends AppCompatActivity {
             //刷新视图
             historyAdapter.notifyDataSetChanged();
         });
-        Log.i(TAG, "onCreate: fdafda");
+
+        //长按事件
+        historyAdapter.setOnItemLongClickListener((view, position) -> {
+            onLongClickShow(view,position);
+        });
+
+        //点击事件
+        onClickShow();
+
+        //点击清除历史记录按钮
+        buttonOfHistoryEdit.setOnClickListener(this::clickHistoryEdit);
     }
 
+    /**
+     * @description 点击清除历史记录按键触发事件
+     * @param view
+     * @param position
+     * @return
+     * @author sherman
+     * @time 2021/10/12 16:25
+     */
+    public void onLongClickShow(View view, int position){
+        PopupMenu popupMenu = new PopupMenu(HistoryActivity.this, view);
+        popupMenu.getMenuInflater().inflate(R.menu.history_delete, popupMenu.getMenu());
+
+        //弹出式菜单的菜单项点击事件
+        popupMenu.setOnMenuItemClickListener(item -> {
+            historyAdapter.notifyItemRemoved(position);
+            TextView textView;
+            switch (item.getItemId()) {
+                case R.id.removeItem:
+                    historyAdapter.notifyItemRemoved(position);
+                    textView = view.findViewById(R.id.list_history_id);
+                    historyRecordViewModel.deleteOneHistoryRecord(
+                            Integer.parseInt(textView.getText().toString())
+                    );
+                    break;
+                case R.id.historyCopyItem:
+                    historyAdapter.notifyDataSetChanged();
+                    ClipboardManager clip = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    textView = view.findViewById(R.id.list_history_url);
+                    ClipData clipData = ClipData.newPlainText(null, textView.getText().toString());
+                    clip.setPrimaryClip(clipData);
+                    Toast.makeText(HistoryActivity.this,"网址已复制到粘贴板",Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
+        popupMenu.show();
+    }
+
+    /**
+     * 单击item触发事件
+     */
+    private void onClickShow(){
+        historyAdapter.setOnItemClickListener((view, section, position) -> {
+                TextView url = view.findViewById(R.id.list_history_url);
+                Intent intent = new Intent(HistoryActivity.this, HomeActivity.class);
+                intent.putExtra("history_url",url.getText().toString());
+                startActivity(intent);
+        });
+    }
+
+    private void clickHistoryEdit(View view) {
+        System.out.println("========================");
+        // View当前PopupMenu显示的相对View的位置
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        // menu布局
+        popupMenu.getMenuInflater().inflate(R.menu.history_edit, popupMenu.getMenu());
+        // menu的item点击事件
+        popupMenu.setOnMenuItemClickListener(item -> {
+            //点击逻辑
+            switch (item.getItemId()){
+                case R.id.remove_today_history:
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date = new Date();
+                    String time = simpleDateFormat.format(date);
+                    historyRecordViewModel.deleteTodayHistory(time);
+                    break;
+                case R.id.remove_all_history:
+                    historyRecordViewModel.deleteAll();
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
+
+        // PopupMenu关闭事件
+        popupMenu.setOnDismissListener(menu -> {
+            //关闭后的逻辑
+            /*Toast.makeText(getApplicationContext(), null, Toast.LENGTH_SHORT).show();*/
+        });
+        popupMenu.show();
+    }
 
     /**
      * 将拿到的数据进行排序，排好序后进行分组，再对分组进行排序，最后返回一个有序的分组

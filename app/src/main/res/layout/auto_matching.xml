@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/history_search_page">
+
+        <LinearLayout
+            android:id="@+id/history_search_page_frame"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            tools:ignore="RtlHardcoded">
+
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingLeft="30dp"
+                android:layout_weight="12">
+
+                <EditText
+                    android:id="@+id/history_page_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ellipsize="start"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:paddingLeft="45dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="2dp"
+                    android:singleLine="true"
+                    android:textColor="#929292"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/history_page_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="取消"
+                    android:textColor="#2376b7"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/history_search_page_line"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@+id/history_search_page_frame"
+            android:layout_marginTop="10dp"
+            android:background="#e2e1e4" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/history_search_page_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/history_search_page_line"
+            android:layout_marginTop="5dp" />
+
+    </RelativeLayout>
+</layout>

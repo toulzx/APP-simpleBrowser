@@ -4,15 +4,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -30,11 +35,16 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
 import cn.njupt.assignment.tou.fragment.footerFragment;
 import cn.njupt.assignment.tou.fragment.headerFragment;
+import cn.njupt.assignment.tou.utils.UrlUtil;
+import cn.njupt.assignment.tou.utils.WebViewFragment;
+import cn.njupt.assignment.tou.utils.WebViewHelper;
+import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,6 +54,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private EditText mSearch;
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
+
+    private Intent intentOfHistory;
+    private HistoryRecordViewModel historyRecordViewModel;
 
     private footerFragment mFooter;
     private headerFragment mHeader;
@@ -71,6 +84,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
         setContentView(R.layout.activity_home);
 
         mContext = this;
@@ -211,6 +225,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint({"SetJavaScriptEnabled"})
     private void initWebView() {
 
+
         /* 使用重写的 WebViewClient 和 WebChromeClient */
         mWebView.setWebViewClient(new sWebViewClient(){});
         mWebView.setWebChromeClient(new sWebChromeClient(){});
@@ -285,8 +300,27 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         // HTTP与HTTPS混合加载模式（注：application 中需启用 android:usesCleartextTraffic="true"）
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // 加载首页
-        mWebView.loadUrl(getResources().getString(R.string.home_url));
+        intentOfHistory =getIntent();
+        String historyUrl = intentOfHistory.getStringExtra("history_url");
+        if (WebViewHelper.currentWebView!=null){
+            if (WebViewHelper.currentBundle!=null){
+                mWebView.restoreState(WebViewHelper.currentBundle);
+                mSearch.setText(WebViewHelper.currentWebView.getUrl());
+            }else{
+                mWebView.loadUrl(WebViewHelper.currentWebView.getUrl());
+            }
+        }else{
+            if (historyUrl!=null){
+                mWebView.loadUrl(historyUrl);
+            }else{
+                // 加载首页
+                mWebView.loadUrl(getResources().getString(R.string.home_url));
+            }
+        }
+
+        WebViewHelper.headWebView = WebViewHelper.currentWebView;
+
+
 
     }
 
@@ -363,14 +397,30 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         } else if (id == R.id.img_view_records) {
             // TODO
             System.out.println("records");
-            Toast.makeText(mContext, "records 功能开发中", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(mContext, "records 功能开发中", Toast.LENGTH_SHORT).show();
             /*午 测试*/
-            Intent intent=new Intent(HomeActivity.this, DemoActivity.class);
+            Intent intent=new Intent(HomeActivity.this, HistoryActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.img_view_pages) {
             // TODO
-            Toast.makeText(mContext, "pages 功能开发中", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(mContext, "pages 功能开发中", Toast.LENGTH_SHORT).show();
+            WebViewHelper.headWebView = mWebView;
+            if (!WebViewHelper.isExist) {
+                if (mWebView == null) {
+                    Log.e("houxl", "生成空窗口");
+                    WebViewHelper.webList.add(new WebViewFragment(null, myShot(HomeActivity.this)));
+                    WebViewHelper.currentWebView = null;
+                } else {
+                    Log.e("houxl", "生成实时窗口");
+                    WebViewHelper.currentWebView = mWebView;
+                    mWebView.setDrawingCacheEnabled(true);
+                    WebViewHelper.webList.add(new WebViewFragment(mWebView, myShot(HomeActivity.this)));
+                }
+                WebViewHelper.isExist = true;
+            }
+            Intent intent=new Intent(HomeActivity.this, PagerActivity.class);
+            startActivity(intent);
         }
 
     }
@@ -465,7 +515,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
                     + File.separator + System.currentTimeMillis() + ".xml";
             mWebView.saveWebArchive(cacheFileName);
-
+            //记录浏览的历史记录
+            historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
+            Log.i(TAG, "onPageFinished: "+webView.getTitle());
+            Log.i(TAG, "onPageFinished: "+webView.getUrl());
+            Log.i(TAG, "onPageFinished: "+UrlUtil.getIconUrl(webView.getUrl()));
         }
 
 
@@ -627,6 +681,34 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
+    }
+
+    public Bitmap myShot(Activity activity) {
+        // 获取windows中最顶层的view
+        View view = activity.getWindow().getDecorView();
+        view.buildDrawingCache();
+
+        // 获取状态栏高度
+        Rect rect = new Rect();
+        view.getWindowVisibleDisplayFrame(rect);
+        int statusBarHeights = rect.top;
+        Display display = activity.getWindowManager().getDefaultDisplay();
+
+        // 获取屏幕宽和高
+        int widths = display.getWidth();
+        int heights = display.getHeight();
+
+        // 允许当前窗口保存缓存信息
+        view.setDrawingCacheEnabled(true);
+
+        // 去掉状态栏
+        Bitmap bmp = Bitmap.createBitmap(view.getDrawingCache(), 0,
+                statusBarHeights, widths, heights - statusBarHeights);
+
+        // 销毁缓存信息
+        view.destroyDrawingCache();
+
+        return bmp;
     }
 
 
