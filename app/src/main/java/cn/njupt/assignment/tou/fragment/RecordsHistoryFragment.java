@@ -1,14 +1,18 @@
-package cn.njupt.assignment.tou.activity;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.OrientationHelper;
-import androidx.recyclerview.widget.RecyclerView;
+package cn.njupt.assignment.tou.fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,52 +20,61 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.adapter.DemoAdapter;
+import cn.njupt.assignment.tou.adapter.HistoryAdapter;
 import cn.njupt.assignment.tou.entity.HistoryList;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
 import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
-public class DemoActivity extends AppCompatActivity {
-    private final static String TAG = DemoActivity.class.getSimpleName();
+public class RecordsHistoryFragment extends Fragment {
 
-    HistoryRecordViewModel historyRecordViewModel;
+    private static final String TAG = RecordsHistoryFragment.class.getSimpleName();
+    private View mView;
+
     RecyclerView recyclerView;
-    LinearLayoutManager linearLayoutManager;    /*集合显示控件recyclerview的管理器*/
-
-    DemoAdapter historyAdapter;  /*控件recyclerview的适配器*/
+    HistoryRecordViewModel historyRecordViewModel;
+    HistoryAdapter historyAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        mView  = inflater.inflate(R.layout.fragment_dialog_records_history, container, false);
+
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
-        setContentView(R.layout.history_demo);
-        recyclerView = findViewById(R.id.list_history);
+
+        recyclerView = mView.findViewById(R.id.list_history_new);
 
         initData();
+
         //添加RecyclerView管理器
-        linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(OrientationHelper.VERTICAL);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        Log.i(TAG, "onCreateView: requireContext() = "+requireContext());
 
         //添加适配器
         Log.i(TAG, sortForList(historyRecordViewModel.getAll()).get(0).getTime());
-        historyAdapter = new DemoAdapter(this,sortForList(historyRecordViewModel.getAll()));
+        historyAdapter = new HistoryAdapter(getContext(),sortForList(historyRecordViewModel.getAll()));
         recyclerView.setAdapter(historyAdapter);
 
         //实时更新recycler view的状态并展示出来
-        historyRecordViewModel.getHistoryRecordAll().observe(this, historyRecords -> {
+        historyRecordViewModel.getHistoryRecordAll().observe(getViewLifecycleOwner(), historyRecords -> {
             Collections.sort(historyRecords);
             historyAdapter.setHistoryRecords(historyRecords);
             historyAdapter.setAllRecords(sortForList(historyRecords));
 
-            //刷新视图
-            historyAdapter.notifyDataSetChanged();
+        //刷新视图
+        historyAdapter.notifyDataSetChanged();
         });
-        Log.i(TAG, "onCreate: fdafda");
+
+        return mView;
     }
+
 
 
     /**
@@ -119,10 +132,10 @@ public class DemoActivity extends AppCompatActivity {
         return groups;
     }
 
-    /**
-     * 初始化一些测试数据
-     */
-    private void initData(){
+
+
+
+    private void initData() {
         try {
             @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
@@ -156,5 +169,6 @@ public class DemoActivity extends AppCompatActivity {
             System.out.println("插入测试数据失败");
         }
     }
+
 
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bottom_sheet_bg">
+
+    <!-- 注意，应使用 LinearLayout 布局包裹，否则 Tabs 可能无法点击 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_records"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bottom_sheet_bg">
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_item_bookmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="bookmark" />
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_item_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="history" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager_2_records"
+        android:layout_width="match_parent"
+        android:layout_height="700dp" />
+</LinearLayout>
+

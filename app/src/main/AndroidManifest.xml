@@ -12,12 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SimpleBrowser"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".activity.DemoActivity"
-            android:exported="true" />
+
         <activity
             android:name=".activity.HomeActivity"
-            android:exported="true"
             android:screenOrientation="unspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

@@ -13,10 +13,12 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -25,7 +27,8 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -33,8 +36,10 @@ import java.net.URLEncoder;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
-import cn.njupt.assignment.tou.fragment.footerFragment;
-import cn.njupt.assignment.tou.fragment.headerFragment;
+import cn.njupt.assignment.tou.fragment.BarFooterFragment;
+import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
+import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
+import cn.njupt.assignment.tou.utils.ToastUtil;
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -45,12 +50,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
 
-    private footerFragment mFooter;
-    private headerFragment mHeader;
-
-    FragmentManager mFragmentManager = getSupportFragmentManager();
+    private BarFooterFragment mFooter;
+    private BarHeaderFragment mHeader;
 
     private Context mContext;
+    private FragmentManager mFragmentManager;
     private InputMethodManager inputMethodManager;
 
     private long exitTime = 0;
@@ -66,6 +70,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private static final int ALLOW_IMAGE_LOADED = 1;
     private static final int PROHIBIT_IMAGE_LOADED = 0;
 
+    private BottomSheetDialog bottomSheetDialog;
+
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +80,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_home);
 
         mContext = this;
+        mFragmentManager = getSupportFragmentManager();
         inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
         initUI();
@@ -101,7 +108,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 系统返回键 绑定 webView 后退操作
-     *
      * @return void
      * @date 2021/9/14 17:27
      * @author tou
@@ -113,7 +119,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             if ((System.currentTimeMillis() - exitTime) > PRESS_BACK_EXIT_GAP) {
                 // 连点两次退出程序
-                Toast.makeText(mContext, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                ToastUtil.shortToast(mContext, "再按一次退出程序");
                 exitTime = System.currentTimeMillis();
             } else {
                 super.onBackPressed();
@@ -149,8 +155,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mRecords = findViewById(R.id.img_view_records);
         mPages = findViewById(R.id.img_view_pages);
 
-        mFooter =  (footerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_footer);
-        mHeader =  (headerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_header);
+        mFooter =  (BarFooterFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_footer);
+        mHeader =  (BarHeaderFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_header);
 
         mResize.setOnClickListener(this);
         mReload.setOnClickListener(this);
@@ -160,45 +166,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mRecords.setOnClickListener(this);
         mPages.setOnClickListener(this);
 
-
-        // 地址输入栏获取与失去焦点处理
-        mSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (hasFocus) {
-                    // 显示当前网址链接
-                    mSearch.setTextColor(ContextCompat.getColor(mContext, R.color.edit_text_color));
-                    mSearch.setText(mWebView.getUrl());
-                    // 光标置于末尾
-                    mSearch.setSelection(mSearch.getText().length());
-                    // 显示因特网图标
-//                    webIcon.setImageResource(R.drawable.internet);
-                    // 显示跳转按钮
-//                    btnStart.setImageResource(R.drawable.go);
-                } else {
-                    // 显示网站名
-                    mSearch.setTextColor(ContextCompat.getColor(mContext, R.color.edit_text_color_hint));
-                    mSearch.setText(mWebView.getTitle());
-                    // 显示网站图标
-//                    webIcon.setImageBitmap(mWebView.getFavicon());
-                    // 显示刷新按钮
-//                    btnStart.setImageResource(R.drawable.refresh);
-                }
-            }
-        });
-
-        // 监听键盘回车搜索
-        mSearch.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                    mReload.callOnClick();
-                    mSearch.clearFocus();
-                }
-                return false;
-            }
-        });
-
+        setListener();
 
     }
 
@@ -212,35 +180,28 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private void initWebView() {
 
         /* 使用重写的 WebViewClient 和 WebChromeClient */
+
         mWebView.setWebViewClient(new sWebViewClient(){});
         mWebView.setWebChromeClient(new sWebChromeClient(){});
 
         mWebView.setOnScrollChangedCallback(new sWebView.OnScrollChangedCallback(){
             public void onScroll(int dx, int dy){
                 //这里我们根据dx和dy参数做自己想做的事情
-
                 FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
                 if (dy > 25) {
-
                     fragmentTransaction.hide(mFooter);
                     fragmentTransaction.hide(mHeader);
-
-
                 } else if ( dy < -25 ) {
-
                     fragmentTransaction.show(mFooter);
                     fragmentTransaction.show(mHeader);
-
                 }
-
                 fragmentTransaction.commit();
-
             }
         });
 
 
         /* 设置 */
+
         WebSettings settings = mWebView.getSettings();
 
         // 设置默认编码格式
@@ -294,17 +255,16 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     /*---------------------------------------------------2-----------------------------------------------------------*/
 
     /**
+     * View.OnClick 事件监听
      * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     *
+     * @param view The view that was clicked.
      * @date 2021/9/13
      * @author tou
      */
     @Override
-    public void onClick(View v) {
+    public void onClick(View view) {
 
-        int id = v.getId();
+        int id = view.getId();
 
         /* 判断点击事件的触发者，选择对应触发内容 */
 
@@ -319,7 +279,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 fragmentTransaction.hide(mFooter);
                 fragmentTransaction.hide(mHeader);
             }
-            fragmentTransaction.commit();      // 提交！
+            fragmentTransaction.commit();
 
         } else if (id == R.id.img_view_reload) {
 
@@ -358,20 +318,77 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         } else if (id == R.id.img_view_options) {
             // TODO
-            Toast.makeText(mContext, "options 功能开发中", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(mContext, "options 功能开发中");
 
         } else if (id == R.id.img_view_records) {
-            // TODO
-            System.out.println("records");
-            Toast.makeText(mContext, "records 功能开发中", Toast.LENGTH_SHORT).show();
-            /*午 测试*/
-            Intent intent=new Intent(HomeActivity.this, DemoActivity.class);
-            startActivity(intent);
+            // TODO: bottomSheetDiaLog
+//            bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialog);
+//            View view2 = LayoutInflater.from(this).inflate(R.layout.activity_records, null, false);
+//            bottomSheetDialog.setContentView(view2);
+//            bottomSheetDialog.show();
+
+            // TODO: Tablayout
+//            startActivity(new Intent(HomeActivity.this, newRecordsActivity.class));
+            new RecordsInDialogFragment().show(getSupportFragmentManager(), "newRecordsFragment");
+
+            /*TODO:午 测试*/
+//            Intent intent=new Intent(HomeActivity.this, DemoActivity.class);
+//            startActivity(intent);
 
         } else if (id == R.id.img_view_pages) {
             // TODO
-            Toast.makeText(mContext, "pages 功能开发中", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(mContext, "pages 功能开发中");
         }
+
+    }
+
+    /**
+     * 其它监听器的设置
+     * - 地址输入栏失去焦点监听
+     * - 监听键盘回车搜索
+     * @return void
+     * @date 2021/10/11 9:43
+     * @author tou
+     */
+    private void setListener() {
+
+        // 地址输入栏获取与失去焦点处理
+        mSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (hasFocus) {
+                    // 显示当前网址链接
+                    mSearch.setTextColor(ContextCompat.getColor(mContext, R.color.edit_text_color));
+                    mSearch.setText(mWebView.getUrl());
+                    // 光标置于末尾
+                    mSearch.setSelection(mSearch.getText().length());
+                    // 显示因特网图标
+//                    webIcon.setImageResource(R.drawable.internet);
+                    // 显示跳转按钮
+//                    btnStart.setImageResource(R.drawable.go);
+                } else {
+                    // 显示网站名
+                    mSearch.setTextColor(ContextCompat.getColor(mContext, R.color.edit_text_color_hint));
+                    mSearch.setText(mWebView.getTitle());
+                    // 显示网站图标
+//                    webIcon.setImageBitmap(mWebView.getFavicon());
+                    // 显示刷新按钮
+//                    btnStart.setImageResource(R.drawable.refresh);
+                }
+            }
+        });
+
+        // 监听键盘回车搜索
+        mSearch.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                    mReload.callOnClick();
+                    mSearch.clearFocus();
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -417,7 +434,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-
         /**
          * 当页面开始加载时
          * 显示加载进度
@@ -441,9 +457,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-
-
-
         /**
          * 当页面加载完毕
          * 修改页面标题
@@ -462,10 +475,23 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             setTitle(mWebView.getTitle());
             mSearch.setText(mWebView.getTitle());
 
-            String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
-                    + File.separator + System.currentTimeMillis() + ".xml";
-            mWebView.saveWebArchive(cacheFileName);
+//            String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
+//                    + File.separator + System.currentTimeMillis() + ".xml";
+//            mWebView.saveWebArchive(cacheFileName);
 
+            String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
+            mWebView.saveWebArchive(cacheFileDir, true, new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+
+                    if (value == null) {
+                        Log.i(TAG, "onReceiveValue: saveWebArchive -> " + value);
+                    } else {
+                        Log.i(TAG, "onReceiveValue: saveWebArchive -> successfully in " + value);
+                    }
+
+                }
+            });
         }
 
 

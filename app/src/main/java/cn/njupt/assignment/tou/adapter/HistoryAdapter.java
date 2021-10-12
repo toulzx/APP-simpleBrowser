@@ -14,10 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.entity.HistoryList;
@@ -28,10 +25,10 @@ import cn.njupt.assignment.tou.entity.HistoryRecord;
  * @date: 2021/10/8
  * @description: 作为demo的adapter
  */
-public class DemoAdapter extends SectionedRecyclerViewAdapter<
-        DemoAdapter.HistoryHeaderViewHolder,
-        DemoAdapter.HistoryHolder,
-        DemoAdapter.HistoryFooterViewHolder> {
+public class HistoryAdapter extends SectionedRecyclerViewAdapter<
+        HistoryAdapter.HistoryHeaderViewHolder,
+        HistoryAdapter.HistoryHolder,
+        HistoryAdapter.HistoryFooterViewHolder> {
 
     static class HistoryHolder extends RecyclerView.ViewHolder{
         //显示item部分
@@ -78,11 +75,11 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
 
     Context context;    /*上下文*/
 
-    public DemoAdapter(Context context){
+    public HistoryAdapter(Context context){
         this.context = context;
     }
 
-    public DemoAdapter(Context context, List<HistoryList> allRecords){
+    public HistoryAdapter(Context context, List<HistoryList> allRecords){
         Log.i("DemoAdapter", "DemoAdapter: start");
         this.context = context;
         this.allRecords = allRecords;
@@ -103,20 +100,20 @@ public class DemoAdapter extends SectionedRecyclerViewAdapter<
         //定义一个构造
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         //创建卡片  参数——————  布局，组件组，是否是根节点
-        View itemView = layoutInflater.inflate(R.layout.history_list_unit, parent, false);
+        View itemView = layoutInflater.inflate(R.layout.layout_history_list_unit, parent, false);
         //返回组件卡片
         return new HistoryHolder(itemView);
     }
 
     @Override
     protected HistoryHeaderViewHolder onCreateSectionHeaderViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.history_header, parent, false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.layout_history_header, parent, false);
         return new HistoryHeaderViewHolder(itemView);
     }
 
     @Override
     protected HistoryFooterViewHolder onCreateSectionFooterViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.history_footer, parent, false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.layout_history_footer, parent, false);
         return new HistoryFooterViewHolder(itemView);
     }
 
