@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- BottomSheet style -->
+    <!--实现BottomSheetDialog圆角效果 且无背景阴影-->
+    <style name="BottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/bottomSheetStyleWrapper</item>
+<!--        <item name="android:layout_margin">2dp</item>-->
+        <item name="animateRelativeTo">@layout/fragment_bar_footer</item>
+    </style>
+    <style name="bottomSheetStyleWrapper" parent="Widget.Design.BottomSheet.Modal">
+<!--        <item name="behavior_peekHeight">350dp</item>-->
+<!--        <item name="android:layout_margin">5dp</item>-->
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    <style name="BottomSheetDialogBg" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/bottomSheetStyleWrapper</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+</resources>

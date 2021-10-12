@@ -73,7 +73,7 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
         HistoryRecord record = historyRecords.get(position);
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        View itemView = inflater.inflate(R.layout.history_list_unit,parent);
+        View itemView = inflater.inflate(R.layout.layout_history_list_unit,parent);
 
         ImageView image = view.findViewById(R.id.list_history_image);
         TextView name = view.findViewById(R.id.list_history_name);

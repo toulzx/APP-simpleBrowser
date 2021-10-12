@@ -9,5 +9,7 @@
     <dimen name="image_view_header_dimen"> 20dp </dimen>
     <dimen name="image_view_footer_dimen"> 25dp </dimen>
     <dimen name="progress_bar_height"> 2dp </dimen>
-    
+    <dimen name="list_item_spacing">16dp</dimen>
+    <dimen name="list_item_spacing_half">8dp</dimen>
+
 </resources>

@@ -16,6 +16,7 @@ import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.entity.HistoryList;
@@ -93,6 +94,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
     }
 
     public HistoryAdapter(Context context, List<HistoryList> allRecords){
+        Log.i("DemoAdapter", "DemoAdapter: start");
         this.context = context;
         this.allRecords = allRecords;
     }
@@ -133,20 +135,20 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         //定义一个构造
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         //创建卡片  参数——————  布局，组件组，是否是根节点
-        View itemView = layoutInflater.inflate(R.layout.history_list_unit, parent, false);
+        View itemView = layoutInflater.inflate(R.layout.layout_history_list_unit, parent, false);
         //返回组件卡片
         return new HistoryHolder(itemView);
     }
 
     @Override
     protected HistoryHeaderViewHolder onCreateSectionHeaderViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.history_header, parent, false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.layout_history_header, parent, false);
         return new HistoryHeaderViewHolder(itemView);
     }
 
     @Override
     protected HistoryFooterViewHolder onCreateSectionFooterViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.history_footer, parent, false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.layout_history_footer, parent, false);
         return new HistoryFooterViewHolder(itemView);
     }
 

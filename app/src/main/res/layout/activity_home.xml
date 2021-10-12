@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/fragment_header"
-        android:name="cn.njupt.assignment.tou.fragment.headerFragment"
+        android:name="cn.njupt.assignment.tou.fragment.BarHeaderFragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_height"
         app:layout_constraintTop_toTopOf="parent"
@@ -28,7 +28,7 @@
 
     <fragment
         android:id="@+id/fragment_footer"
-        android:name="cn.njupt.assignment.tou.fragment.footerFragment"
+        android:name="cn.njupt.assignment.tou.fragment.BarFooterFragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_height"
         app:layout_constraintBottom_toBottomOf="parent"
