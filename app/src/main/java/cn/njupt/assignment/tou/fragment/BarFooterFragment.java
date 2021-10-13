@@ -12,10 +12,15 @@ import androidx.fragment.app.Fragment;
 import cn.njupt.assignment.tou.R;
 
 public class BarFooterFragment extends Fragment {
+
+    private View mView;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_bar_footer, container, false);
+        if (mView == null) {
+            mView = inflater.inflate(R.layout.fragment_bar_footer, container, false);
+        }
+        return mView;
     }
 }

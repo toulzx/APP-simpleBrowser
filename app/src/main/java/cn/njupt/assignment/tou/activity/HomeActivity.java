@@ -354,19 +354,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             ToastUtil.shortToast(mContext, "options 功能开发中");
 
         } else if (id == R.id.img_view_records) {
-            // TODO: bottomSheetDiaLog
-//            bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialog);
-//            View view2 = LayoutInflater.from(this).inflate(R.layout.activity_records, null, false);
-//            bottomSheetDialog.setContentView(view2);
-//            bottomSheetDialog.show();
 
-            // TODO: Tablayout
-//            startActivity(new Intent(HomeActivity.this, newRecordsActivity.class));
-            new RecordsInDialogFragment().show(getSupportFragmentManager(), "newRecordsFragment");
-
-            /*TODO:午 测试*/
-//            Intent intent=new Intent(HomeActivity.this, DemoActivity.class);
-//            startActivity(intent);
+            new RecordsInDialogFragment().show(getSupportFragmentManager(), "RecordsInDialogFragment");
 
         } else if (id == R.id.img_view_pages) {
             // TODO
@@ -440,8 +429,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         });
 
     }
-
-
 
     /**
      * 重写 WebViewClient
@@ -524,26 +511,25 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             setTitle(mWebView.getTitle());
             mSearch.setText(mWebView.getTitle());
 
-//            String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
-//                    + File.separator + System.currentTimeMillis() + ".xml";
-//            mWebView.saveWebArchive(cacheFileName);
+            /* 保存网页功能 */
+////            String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
+////                    + File.separator + System.currentTimeMillis() + ".xml";
+////            mWebView.saveWebArchive(cacheFileName);
+//            String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
+//            mWebView.saveWebArchive(cacheFileDir, true, new ValueCallback<String>() {
+//                @Override
+//                public void onReceiveValue(String value) {
+//                    if (value == null) {
+//                        Log.i(TAG, "onReceiveValue: saveWebArchive -> " + value);
+//                    } else {
+//                        Log.i(TAG, "onReceiveValue: saveWebArchive -> successfully in " + value);
+//                    }
+//                }
+//            });
 
             //记录浏览的历史记录
             historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
 
-            String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
-            mWebView.saveWebArchive(cacheFileDir, true, new ValueCallback<String>() {
-                @Override
-                public void onReceiveValue(String value) {
-
-                    if (value == null) {
-                        Log.i(TAG, "onReceiveValue: saveWebArchive -> " + value);
-                    } else {
-                        Log.i(TAG, "onReceiveValue: saveWebArchive -> successfully in " + value);
-                    }
-
-                }
-            });
         }
 
 

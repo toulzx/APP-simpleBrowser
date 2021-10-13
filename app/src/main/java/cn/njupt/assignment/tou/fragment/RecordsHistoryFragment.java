@@ -10,10 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,30 +40,28 @@ public class RecordsHistoryFragment extends Fragment {
     private static final String TAG = RecordsHistoryFragment.class.getSimpleName();
     private View mView;
 
-    RecyclerView recyclerView;
-    HistoryRecordViewModel historyRecordViewModel;
-    HistoryAdapter historyAdapter;
-
-    Button buttonOfHistoryEdit;
+    private RecyclerView recyclerView;
+    private HistoryRecordViewModel historyRecordViewModel;
+    private HistoryAdapter historyAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mView  = inflater.inflate(R.layout.fragment_dialog_records_history, container, false);
+        if (mView == null) {
+            mView  = inflater.inflate(R.layout.fragment_dialog_records_history, container, false);
+        }
 
+        // bind and initialize
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
-
         recyclerView = mView.findViewById(R.id.list_history_new);
 
-        buttonOfHistoryEdit = mView.findViewById(R.id.button_clear_history);
-
         initData();
+        recyclerView.setNestedScrollingEnabled(false);
 
         //添加RecyclerView管理器
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -94,11 +90,11 @@ public class RecordsHistoryFragment extends Fragment {
         //点击事件
         onClickShow();
 
-        //点击清除历史记录按钮
-        buttonOfHistoryEdit.setOnClickListener(new View.OnClickListener() {
+        // 回调函数，当点击 ParentFragment 中的 Button 时，触发清除历史记录操作
+        RecordsInDialogFragment.setHistoryCallBackListener(new HistoryCallBackListener() {
             @Override
-            public void onClick(View view) {
-                System.out.println("========================");
+            public void onHistoryButtonClick(View view) {
+                Log.i(TAG, "onButtonClick: 我不好我不好我不好");
                 // View当前PopupMenu显示的相对View的位置
                 PopupMenu popupMenu = new PopupMenu(getContext(), view);
                 // menu布局

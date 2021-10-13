@@ -2,10 +2,12 @@ package cn.njupt.assignment.tou.fragment;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -21,7 +23,9 @@ import java.util.List;
 
 import cn.njupt.assignment.tou.R;
 
-public class RecordsInDialogFragment extends BottomSheetDialogFragment {
+public class RecordsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener {
+
+    private static final String TAG = RecordsInDialogFragment.class.getSimpleName();
 
     private View mView;
 
@@ -30,6 +34,8 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment {
 
     private TabLayout mTabLayout;
     private ViewPager2 mViewPager2;
+    private AppCompatButton mBtnCancel;
+    private AppCompatButton mBtnSet;
 
     private TabLayoutMediator mTabLayoutMediator;
 
@@ -40,21 +46,26 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment {
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
-            // test: 设置选中时tab的大小
-//            for (int i = 0; i < mTabLayout.getTabCount(); i++) {
-//                TabLayout.Tab tab = mTabLayout.getTabAt(i);
-//                assert tab != null;
-//                TextView tabView = (TextView) tab.getCustomView();
-//                if (tab.getPosition() == position) {
-//                    tabView.setTextSize(20);
-//                    tabView.setTypeface(Typeface.DEFAULT_BOLD);
-//                } else {
-//                    tabView.setTextSize(14);
-//                    tabView.setTypeface(Typeface.DEFAULT);
-//                }
-//            }
+            // 修改公用按钮
+            if (position == 0) {
+                mBtnSet.setText("看情况呢");
+            } else if (position == 1) {
+                mBtnSet.setText("编辑");
+            }
         }
     };
+
+    // TODO: 也许可以写到 1 个 Callback 中...
+    // 但我遇到了问题，要怎么分辨唤起哪边的 Callback 呢
+    public static HistoryCallBackListener mHistoryListener;
+    public static BookmarkCallbackListener mBookmarkListener;
+
+    public static void setHistoryCallBackListener(HistoryCallBackListener listener) {
+        mHistoryListener = listener;
+    }
+    public static void setBookmarkCallBackListener(BookmarkCallbackListener listener) {
+        mBookmarkListener = listener;
+    }
 
 
     @Override
@@ -70,21 +81,34 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment {
         super.onCreateDialog(savedInstanceState);
 
         // bind  view
-        mView = View.inflate(getContext(), R.layout.fragment_dialog_records, null);
+        if (mView == null) {
+            mView = View.inflate(getContext(), R.layout.fragment_dialog_records, null);
+        }
 
         // bind bottomSheetDialog
         mBottomSheetDialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
         mBottomSheetDialog.setContentView(mView);
 
-        // 获取behavior
+        // get and set behavior
         mBottomSheetBehavior = BottomSheetBehavior.from((View) mView.getParent());
+        mBottomSheetBehavior.setHideable(true);
+        mBottomSheetBehavior.setSkipCollapsed(true);
 
         // bind var
         mTabLayout = mView.findViewById(R.id.tab_layout_records);
         mViewPager2 = mView.findViewById(R.id.view_pager_2_records);
+        mBtnCancel = mView.findViewById(R.id.btn_records_cancel);
+        mBtnSet = mView.findViewById(R.id.btn_records_ultra_set);
+
+        mBtnCancel.setOnClickListener(this);
+        mBtnSet.setOnClickListener(this);
 
         mFragmentList.add(new RecordsBookmarkFragment());
         mFragmentList.add(new RecordsHistoryFragment());
+
+        // TODO: 最后要禁止使用 viewPager2 滚动，以防与手势冲突
+        mViewPager2.setUserInputEnabled(true);
+        mViewPager2.setNestedScrollingEnabled(false);
 
         // bind Adapter
         mViewPager2.setAdapter(new FragmentStateAdapter(this) {
@@ -93,6 +117,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment {
             public Fragment createFragment(int position) {
                 return mFragmentList.get(position);
             }
+
             @Override
             public int getItemCount() {
                 return mFragmentList.size();
@@ -156,4 +181,34 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment {
         super.dismiss();
     }
 
+
+    /**
+     * Called when a view has been clicked.
+     * @param view The view that was clicked.
+     */
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.btn_records_cancel) {
+
+            //设置合起状态
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        } else if (view.getId() == R.id.btn_records_ultra_set) {
+
+            if (mViewPager2.getCurrentItem() == 0) {
+                if (mBookmarkListener != null) {
+                    mBookmarkListener.onBookmarkButtonClick(view);
+                } else {
+                    Log.e(TAG, "onClick: mBookmarkListener != null");
+                }
+            } else if (mViewPager2.getCurrentItem() == 1) {
+                if (mHistoryListener != null) {
+                    mHistoryListener.onHistoryButtonClick(view);
+                } else {
+                    Log.e(TAG, "onClick: mBookmarkListener != null");
+                }
+            }
+
+        }
+    }
 }

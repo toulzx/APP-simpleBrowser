@@ -21,8 +21,14 @@ import java.util.List;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.databinding.WindowPagerBinding;
+import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.WebViewHelper;
 
+/**
+ * 多窗口页面
+ * @date 2021/10/12
+ * @author GodWuzZ
+ */
 public class PagerActivity extends HomeActivity {
 
     int num,cur=0;
