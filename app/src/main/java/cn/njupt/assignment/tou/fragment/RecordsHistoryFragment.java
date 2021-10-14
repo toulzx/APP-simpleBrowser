@@ -30,6 +30,7 @@ import java.util.List;
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
 import cn.njupt.assignment.tou.adapter.HistoryAdapter;
+import cn.njupt.assignment.tou.callback.RecordsHistoryCallBackListener;
 import cn.njupt.assignment.tou.entity.HistoryList;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
 import cn.njupt.assignment.tou.utils.ToastUtil;
@@ -91,7 +92,7 @@ public class RecordsHistoryFragment extends Fragment {
         onClickShow();
 
         // 回调函数，当点击 ParentFragment 中的 Button 时，触发清除历史记录操作
-        RecordsInDialogFragment.setHistoryCallBackListener(new HistoryCallBackListener() {
+        RecordsInDialogFragment.setHistoryCallBackListener(new RecordsHistoryCallBackListener() {
             @Override
             public void onHistoryButtonClick(View view) {
                 Log.i(TAG, "onButtonClick: 我不好我不好我不好");

@@ -1,6 +1,9 @@
 package cn.njupt.assignment.tou.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,7 +24,9 @@ import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
+import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
 import cn.njupt.assignment.tou.utils.OptionSPHelper;
+import cn.njupt.assignment.tou.utils.ToastUtil;
 
 public class OptionsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener, SwitchCompat.OnCheckedChangeListener {
 
@@ -33,13 +38,12 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
     private BottomSheetBehavior<View> mBottomSheetBehavior;
 
     private ImageButton mBtnCancel;
-    private ConstraintLayout mCtOrientation;
-    private Switch mStOrientation;
+    private Switch mStGraphless, mStOrientation, mStPrivate;
 
-    public static OptionsImageBlockCallbackListener mImageBlockCallbackListener;
+    public static OptionsGraphlessModeCallbackListener mGraphlessModeCallbackListener;
 
-    public static void SetImageBlockCallbackListener(OptionsImageBlockCallbackListener listener) {
-        mImageBlockCallbackListener = listener;
+    public static void SetGraphlessModeCallbackListener(OptionsGraphlessModeCallbackListener listener) {
+        mGraphlessModeCallbackListener = listener;
     }
 
 
@@ -68,16 +72,26 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
         // bind var
         mBtnCancel = mView.findViewById(R.id.options_button_cancel);
-        mCtOrientation = mView.findViewById(R.id.option_graphless_mode);
-        mStOrientation = mView.findViewById(R.id.switch_graphless_mode);
+        mStOrientation = mView.findViewById(R.id.switch_orientation_lock);
+        mStGraphless = mView.findViewById(R.id.switch_graphless_mode);
+        mStPrivate = mView.findViewById(R.id.switch_private_mode);
 
-        if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
+        // set status
+        if (!Objects.equals(OptionSPHelper.getLockOrientationValue(), "auto")) {
             mStOrientation.setChecked(true);
         }
+        if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
+            mStGraphless.setChecked(true);
+        }
+        if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(true))) {
+            mStPrivate.setChecked(true);
+        }
 
+        // set listener
         mBtnCancel.setOnClickListener(this);
-        mCtOrientation.setOnClickListener(this);
         mStOrientation.setOnCheckedChangeListener(this);
+        mStGraphless.setOnCheckedChangeListener(this);
+        mStPrivate.setOnCheckedChangeListener(this);
 
         return mBottomSheetDialog;
     }
@@ -102,6 +116,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
      * Called when a view has been clicked.
      * @param view The view that was clicked.
      */
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     public void onClick(View view) {
 
@@ -109,17 +124,6 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
             //设置合起状态
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        } else if (view.getId() == R.id.option_graphless_mode) {
-
-            if (mStOrientation.isChecked()) {
-                mImageBlockCallbackListener.setImageBlock(HomeActivity.PROHIBIT_IMAGE_LOADED);
-            } else {
-                mImageBlockCallbackListener.setImageBlock(HomeActivity.ALLOW_IMAGE_LOADED);
-            }
-
-            mStOrientation.setChecked(!mStOrientation.isChecked());
-            OptionSPHelper.setValue(null, null, String.valueOf(mStOrientation.isChecked()));
 
         }
 
@@ -135,14 +139,39 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
         if (!buttonView.isPressed()) {
             return;
         }
-        if (buttonView.getId() == R.id.switch_graphless_mode) {
+        if (buttonView.getId() == R.id.switch_orientation_lock) {
 
-            if (mImageBlockCallbackListener != null) {
+            Configuration configuration = getResources().getConfiguration();
+
+            if (isChecked) {
+
+                // 如果当前是横屏，锁定横屏
+                if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    OptionSPHelper.setValue("horizontal", null, null);
+                    ToastUtil.shortToast(requireContext(), "锁定横屏啦");
+                }
+                // 如果当前是竖屏，锁定竖屏
+                if(configuration.orientation==Configuration.ORIENTATION_PORTRAIT){
+                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    OptionSPHelper.setValue("vertical", null, null);
+                    ToastUtil.shortToast(requireContext(), "锁定竖屏啦");
+                }
+
+            } else {
+                // 如果关闭开关，则取消锁定
+                requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                OptionSPHelper.setValue("auto", null, null);
+            }
+
+        } else if (buttonView.getId() == R.id.switch_graphless_mode) {
+
+            if (mGraphlessModeCallbackListener != null) {
 
                 if (isChecked) {
-                    mImageBlockCallbackListener.setImageBlock(HomeActivity.PROHIBIT_IMAGE_LOADED);
+                    mGraphlessModeCallbackListener.setGraphlessMode(HomeActivity.PROHIBIT_IMAGE_LOADED);
                 } else {
-                    mImageBlockCallbackListener.setImageBlock(HomeActivity.ALLOW_IMAGE_LOADED);
+                    mGraphlessModeCallbackListener.setGraphlessMode(HomeActivity.ALLOW_IMAGE_LOADED);
                 }
 
                 OptionSPHelper.setValue(null, null, String.valueOf(isChecked));
@@ -152,6 +181,10 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
                 Log.e(TAG, "onClick: mImageBlockCallbackListener != null");
 
             }
+
+        } else if (buttonView.getId() == R.id.switch_graphless_mode) {
+
+            OptionSPHelper.setValue(null, String.valueOf(isChecked), null);
 
         }
     }

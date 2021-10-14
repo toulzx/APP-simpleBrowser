@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.njupt.assignment.tou.R;
+import cn.njupt.assignment.tou.callback.RecordsBookmarkCallbackListener;
+import cn.njupt.assignment.tou.callback.RecordsHistoryCallBackListener;
 
 public class RecordsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
@@ -57,13 +59,13 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
 
     // TODO: 也许可以写到 1 个 Callback 中...
     // 但我遇到了问题，要怎么分辨唤起哪边的 Callback 呢
-    public static HistoryCallBackListener mHistoryListener;
-    public static BookmarkCallbackListener mBookmarkListener;
+    public static RecordsHistoryCallBackListener mHistoryListener;
+    public static RecordsBookmarkCallbackListener mBookmarkListener;
 
-    public static void setHistoryCallBackListener(HistoryCallBackListener listener) {
+    public static void setHistoryCallBackListener(RecordsHistoryCallBackListener listener) {
         mHistoryListener = listener;
     }
-    public static void setBookmarkCallBackListener(BookmarkCallbackListener listener) {
+    public static void setBookmarkCallBackListener(RecordsBookmarkCallbackListener listener) {
         mBookmarkListener = listener;
     }
 

@@ -12,6 +12,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import cn.njupt.assignment.tou.R;
+import cn.njupt.assignment.tou.callback.RecordsBookmarkCallbackListener;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 
 public class RecordsBookmarkFragment extends Fragment {
@@ -30,7 +31,7 @@ public class RecordsBookmarkFragment extends Fragment {
         }
 
         // 回调函数
-        RecordsInDialogFragment.setBookmarkCallBackListener(new BookmarkCallbackListener() {
+        RecordsInDialogFragment.setBookmarkCallBackListener(new RecordsBookmarkCallbackListener() {
             @Override
             public void onBookmarkButtonClick(View view) {
                 Log.i(TAG, "onButtonClick: 你好你好你好");

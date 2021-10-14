@@ -73,9 +73,9 @@ public class OptionSPHelper {
 
     /**
      * 修改 SharedPReferences 中所有的数据，不需要修改的填写 null
-     * @param orientation: 屏幕方向的设定值
-     * @param privateMode: 无痕模式的设定值
-     * @param graphlessMode:  无图模式的设定值
+     * @param orientation: 屏幕方向的设定值：vertical,horizontal,auto
+     * @param privateMode: 无痕模式的设定值：true,false
+     * @param graphlessMode:  无图模式的设定值：true,false
      * @return void
      * @date 2021/10/14 17:15
      * @author tou
@@ -121,8 +121,11 @@ public class OptionSPHelper {
 
     }
 
-    /* 以下方法们用来快速获取 SharedPreferences 中的某个数据 */
-
+    /**
+     * 返回屏幕方向的设定值：vertical,horizontal,auto
+     * @return java.lang.String
+     * @author tou
+     */
     public static String getLockOrientationValue() {
 
         if (mApp == null) {
@@ -134,6 +137,11 @@ public class OptionSPHelper {
 
     }
 
+    /**
+     * 返回无痕模式的设定值：true,false
+     * @return java.lang.String
+     * @author tou
+     */
     public static String getPrivateModeValue() {
 
         if (mApp == null) {
@@ -145,6 +153,11 @@ public class OptionSPHelper {
 
     }
 
+    /**
+     * 返回无图模式的设定值：true,false
+     * @return java.lang.String
+     * @author tou
+     */
     public static String getGraphlessModeValue() {
 
         if (mApp == null) {

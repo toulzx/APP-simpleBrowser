@@ -41,7 +41,7 @@ import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
-import cn.njupt.assignment.tou.fragment.OptionsImageBlockCallbackListener;
+import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
 import cn.njupt.assignment.tou.fragment.OptionsInDialogFragment;
 import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
 import cn.njupt.assignment.tou.utils.OptionSPHelper;
@@ -294,9 +294,26 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * @author tou
      */
     private void initData() {
+
         OptionSPHelper.init(getApplication());
+
+        // set Orientation Mode
+        if (Objects.equals(OptionSPHelper.getLockOrientationValue(), "horizontal")) {
+            setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        } else if (Objects.equals(OptionSPHelper.getLockOrientationValue(), "vertical")) {
+            setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        } else if (Objects.equals(OptionSPHelper.getLockOrientationValue(), "auto")) {
+            setScreenOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+
+        // set Graphless Mode
         if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
             setImageBlock(PROHIBIT_IMAGE_LOADED);
+        }
+
+        // no need to set Private Mode here :-)
+        if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
+            //  TODO: 这里不用写。找到记录历史记录部分。直接设置 SharedPreferences
         }
     }
 
@@ -445,20 +462,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         // 回调函数
-        OptionsInDialogFragment.SetImageBlockCallbackListener(new OptionsImageBlockCallbackListener() {
+        OptionsInDialogFragment.SetGraphlessModeCallbackListener(new OptionsGraphlessModeCallbackListener() {
             @Override
-            public void setImageBlock(int flag) {
-                Log.i(TAG, "setImageBlock: hello!!!!!");
-                switch (flag) {
-                    case ALLOW_IMAGE_LOADED:
-                        mWebSettings.setLoadsImagesAutomatically(true);
-                        mWebSettings.setBlockNetworkImage(false);
-                        break;
-                    case PROHIBIT_IMAGE_LOADED:
-                        mWebSettings.setLoadsImagesAutomatically(true);
-                        mWebSettings.setBlockNetworkImage(true);
-                        break;
-                }
+            public void setGraphlessMode(int flag) {
+                setImageBlock(flag);
             }
         });
 
@@ -562,8 +569,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 //            });
 
             //记录浏览的历史记录
-            historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
-
+            if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(true))) {
+                historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
+            }
         }
 
 
@@ -679,8 +687,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 预留接口：设置屏幕方向
-     * TODO: 设置页调用
+     * 设置屏幕方向
+     * 注意 Options 中的设置通过回调函数实现
      * @return void
      * @date 2021/9/22 11:07
      * @author tou
@@ -703,9 +711,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 预留接口：设置是否自动加载图片
+     * 设置是否自动加载图片
+     * 注意 Options 中的设置通过回调函数实现
      * 注意 setLoadsImagesAutomatically 必须始终允许，它关联的不仅是网页上的图片。
-     * TODO: 设置页调用
      * @param flag:
      * @return void
      * @date 2021/9/22 15:01
