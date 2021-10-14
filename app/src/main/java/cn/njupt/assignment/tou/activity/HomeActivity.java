@@ -15,14 +15,12 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -34,16 +32,19 @@ import android.widget.ProgressBar;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
+import cn.njupt.assignment.tou.fragment.OptionsImageBlockCallbackListener;
+import cn.njupt.assignment.tou.fragment.OptionsInDialogFragment;
 import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
+import cn.njupt.assignment.tou.utils.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.UrlUtil;
 import cn.njupt.assignment.tou.utils.WebViewFragment;
@@ -58,6 +59,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private EditText mSearch;
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
+
+    WebSettings mWebSettings;
 
     private BarFooterFragment mFooter;
     private BarHeaderFragment mHeader;
@@ -79,8 +82,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private static final int SCREEN_ORIENTATION_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     private static final int SCREEN_ORIENTATION_UNSPECIFIED = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
-    private static final int ALLOW_IMAGE_LOADED = 1;
-    private static final int PROHIBIT_IMAGE_LOADED = 0;
+    public static final int ALLOW_IMAGE_LOADED = 1;
+    public static final int PROHIBIT_IMAGE_LOADED = 0;
 
     private BottomSheetDialog bottomSheetDialog;
 
@@ -99,6 +102,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         initUI();
 
         initWebView();
+
+        initData();
 
     }
 
@@ -216,49 +221,49 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         /* 设置 */
 
-        WebSettings settings = mWebView.getSettings();
+        mWebSettings = mWebView.getSettings();
 
         // 设置默认编码格式
-        settings.setDefaultTextEncodingName("utf-8");
+        mWebSettings.setDefaultTextEncodingName("utf-8");
         // 设置浏览器 UserAgent
-        settings.setUserAgentString(settings.getUserAgentString() + "; " + getResources().getString(R.string.user_agent_detail));
+        mWebSettings.setUserAgentString(mWebSettings.getUserAgentString() + "; " + getResources().getString(R.string.user_agent_detail));
 //        settings.setUserAgentString("Android");
 
         // 启用 js 功能
-        settings.setJavaScriptEnabled(true);
+        mWebSettings.setJavaScriptEnabled(true);
         // 支持通过JS打开新窗口
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        mWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         // 使用网页元标记中定义的属性加载 WebView
-        settings.setUseWideViewPort(true);
+        mWebSettings.setUseWideViewPort(true);
 
         // 支持缩放，默认为true。是下面那个的前提。
-        settings.setSupportZoom(true);
+        mWebSettings.setSupportZoom(true);
         // 设置内置的缩放控件。
-        settings.setBuiltInZoomControls(true);
+        mWebSettings.setBuiltInZoomControls(true);
         // 隐藏原生的缩放控件
-        settings.setDisplayZoomControls(false);
+        mWebSettings.setDisplayZoomControls(false);
         // 缩放至屏幕的大小
-        settings.setLoadWithOverviewMode(true);
+        mWebSettings.setLoadWithOverviewMode(true);
 
         // 设置可以访问文件
-        settings.setAllowFileAccess(true);
+        mWebSettings.setAllowFileAccess(true);
         // 启用本地缓存
-        settings.setDomStorageEnabled(true);
-        settings.setAppCacheEnabled(true);      // 不推荐使用？弃用？
+        mWebSettings.setDomStorageEnabled(true);
+        mWebSettings.setAppCacheEnabled(true);      // 不推荐使用？弃用？
         // 设置缓存文件路径
         String appCacheDir = this.getBaseContext().getCacheDir().getAbsolutePath(); // /data/user/0/cn.njupt.assignment.tou/cache
 //        String appCacheDir = this.getApplicationContext().getDir("cache", Context.MODE_PRIVATE).getPath();    // /data/user/0/cn.njupt.assignment.tou/app_cache
-        settings.setAppCachePath(appCacheDir);
+        mWebSettings.setAppCachePath(appCacheDir);
         // 设置缓存模式
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        mWebSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         // 启用自动加载图片
-        settings.setLoadsImagesAutomatically(true);
-        settings.setBlockNetworkImage(false);
+        mWebSettings.setLoadsImagesAutomatically(true);
+        mWebSettings.setBlockNetworkImage(false);
 
         // HTTP与HTTPS混合加载模式（注：application 中需启用 android:usesCleartextTraffic="true"）
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        mWebSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         intentOfHistory =getIntent();
         String historyUrl = intentOfHistory.getStringExtra("history_url");
@@ -280,8 +285,19 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         WebViewHelper.headWebView = WebViewHelper.currentWebView;
 
+    }
 
-
+    /**
+     *初始化 SharedPreferences 和控件
+     * @return void
+     * @date 2021/10/14 17:55
+     * @author tou
+     */
+    private void initData() {
+        OptionSPHelper.init(getApplication());
+        if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
+            setImageBlock(PROHIBIT_IMAGE_LOADED);
+        }
     }
 
 
@@ -350,12 +366,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             mWebView.goForward();
 
         } else if (id == R.id.img_view_options) {
-            // TODO
-            ToastUtil.shortToast(mContext, "options 功能开发中");
+
+            new OptionsInDialogFragment().show(getSupportFragmentManager(), OptionsInDialogFragment.class.getSimpleName());
 
         } else if (id == R.id.img_view_records) {
 
-            new RecordsInDialogFragment().show(getSupportFragmentManager(), "RecordsInDialogFragment");
+            new RecordsInDialogFragment().show(getSupportFragmentManager(), RecordsInDialogFragment.class.getSimpleName());
 
         } else if (id == R.id.img_view_pages) {
             // TODO
@@ -425,6 +441,24 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     mSearch.clearFocus();
                 }
                 return false;
+            }
+        });
+
+        // 回调函数
+        OptionsInDialogFragment.SetImageBlockCallbackListener(new OptionsImageBlockCallbackListener() {
+            @Override
+            public void setImageBlock(int flag) {
+                Log.i(TAG, "setImageBlock: hello!!!!!");
+                switch (flag) {
+                    case ALLOW_IMAGE_LOADED:
+                        mWebSettings.setLoadsImagesAutomatically(true);
+                        mWebSettings.setBlockNetworkImage(false);
+                        break;
+                    case PROHIBIT_IMAGE_LOADED:
+                        mWebSettings.setLoadsImagesAutomatically(true);
+                        mWebSettings.setBlockNetworkImage(true);
+                        break;
+                }
             }
         });
 
@@ -652,7 +686,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * @author tou
      */
     @SuppressLint("SourceLockedOrientationActivity")
-    private void setScreenOrientation(int flag) {
+    public void setScreenOrientation(int flag) {
 
         switch (flag) {
             case SCREEN_ORIENTATION_LANDSCAPE:
@@ -673,21 +707,20 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * 注意 setLoadsImagesAutomatically 必须始终允许，它关联的不仅是网页上的图片。
      * TODO: 设置页调用
      * @param flag:
-     * @param webSettings:
      * @return void
      * @date 2021/9/22 15:01
      * @author tou
      */
-    private void setImageBlock(int flag, WebSettings webSettings) {
+    public void setImageBlock(int flag) {
 
         switch (flag) {
             case ALLOW_IMAGE_LOADED:
-                webSettings.setLoadsImagesAutomatically(true);
-                webSettings.setBlockNetworkImage(false);
+                mWebSettings.setLoadsImagesAutomatically(true);
+                mWebSettings.setBlockNetworkImage(false);
                 break;
             case PROHIBIT_IMAGE_LOADED:
-                webSettings.setLoadsImagesAutomatically(true);
-                webSettings.setBlockNetworkImage(true);
+                mWebSettings.setLoadsImagesAutomatically(true);
+                mWebSettings.setBlockNetworkImage(true);
                 break;
         }
 

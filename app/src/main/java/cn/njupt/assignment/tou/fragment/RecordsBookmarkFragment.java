@@ -29,7 +29,7 @@ public class RecordsBookmarkFragment extends Fragment {
             mView = inflater.inflate(R.layout.fragment_dialog_records_bookmark, container, false);
         }
 
-        // 回调函数，当点击 ParentFragment 中的 Button 时，触发清除历史记录操作
+        // 回调函数
         RecordsInDialogFragment.setBookmarkCallBackListener(new BookmarkCallbackListener() {
             @Override
             public void onBookmarkButtonClick(View view) {

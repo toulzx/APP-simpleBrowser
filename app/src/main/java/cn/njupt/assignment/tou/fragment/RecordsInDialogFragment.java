@@ -72,14 +72,11 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(STYLE_NORMAL, R.style.BottomSheetDialog);
-
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        super.onCreateDialog(savedInstanceState);
-
         // bind  view
         if (mView == null) {
             mView = View.inflate(getContext(), R.layout.fragment_dialog_records, null);
@@ -176,12 +173,6 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
 
     }
 
-    @Override
-    public void dismiss() {
-        super.dismiss();
-    }
-
-
     /**
      * Called when a view has been clicked.
      * @param view The view that was clicked.
@@ -203,7 +194,6 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
                 }
             } else if (mViewPager2.getCurrentItem() == 1) {
                 if (mHistoryListener != null) {
-                    mHistoryListener.onHistoryButtonClick(view);
                 } else {
                     Log.e(TAG, "onClick: mBookmarkListener != null");
                 }
