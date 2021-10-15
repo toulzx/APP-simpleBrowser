@@ -45,6 +45,7 @@ public class HistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
         setContentView(R.layout.activity_history);
         recyclerView = findViewById(R.id.list_history);

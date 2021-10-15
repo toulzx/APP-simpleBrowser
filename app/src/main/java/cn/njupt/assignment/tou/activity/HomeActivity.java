@@ -44,6 +44,7 @@ import cn.njupt.assignment.tou.base.sWebView;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
 import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
+import cn.njupt.assignment.tou.repository.BookmarkRepository;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.UrlUtil;
 import cn.njupt.assignment.tou.utils.WebViewFragment;
@@ -64,6 +65,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     private Intent intentOfHistory;
     private HistoryRecordViewModel historyRecordViewModel;
+    private BookmarkRepository bookmarkRepository;
 
     private Context mContext;
     private FragmentManager mFragmentManager;
