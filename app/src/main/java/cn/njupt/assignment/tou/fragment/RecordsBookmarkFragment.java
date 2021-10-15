@@ -1,5 +1,4 @@
 package cn.njupt.assignment.tou.fragment;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -33,10 +32,7 @@ import java.util.regex.Pattern;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.databinding.DataBindingUtil;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import androidx.lifecycle.LiveData;
@@ -56,9 +52,8 @@ import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
 import cn.njupt.assignment.tou.callback.RecordsBookmarkCallbackListener;
-import cn.njupt.assignment.tou.utils.ToastUtil;
 
-public class RecordsBookmarkFragment extends Fragment {
+public class RecordsBookmarkFragment extends Fragment implements View.OnClickListener{
 
     private static final String TAG = RecordsBookmarkFragment.class.getSimpleName();
 
@@ -83,7 +78,7 @@ public class RecordsBookmarkFragment extends Fragment {
     private TextView present_name;
     private TextView upper_name;
 
-    private TextView checked_all;
+    private TextView Tv_checked_all;
     private TextView checked_num;
 
     //中间提示没有书签
@@ -97,15 +92,21 @@ public class RecordsBookmarkFragment extends Fragment {
     private LinearLayout search_layout;
     private EditText search_input;
     private ImageView back_upper;
+    
+    private LinearLayout Ll_new_folder;
+    private LinearLayout Ll_edit;
 
     private boolean isEdit = false;//判断是否在进行编辑操作，false代表没有进行编辑操作
     private boolean isCheckedAll = false;//判断是否选择了全部书签
     private boolean isOpenSearch = true;//判断是否打开搜索框
     private static List<Object> searchResult = new ArrayList<>();//判断是否处于搜索状态
 
-
-    private AppCompatButton button;
-
+    private TextView Tv_checked_cancel;
+    private LinearLayout Ll_checked_delete;
+    private LinearLayout Ll_search;
+    private ImageView Iv_input_cleear;
+    private ImageView Iv_back_upper;
+    private LinearLayout Ll_checked_move;
 
 
     @Override
@@ -117,7 +118,7 @@ public class RecordsBookmarkFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (mView == null) {
-            mView = inflater.inflate(R.layout.fragment_dialog_records_bookmark, container, false);
+            mView = inflater.inflate(R.layout.activity_bookmark, container, false);
         }
 
         // 回调函数
@@ -125,7 +126,7 @@ public class RecordsBookmarkFragment extends Fragment {
             @Override
             public void onBookmarkButtonClick(View view) {
                 Log.i(TAG, "onButtonClick: 你好你好你好");
-                ToastUtil.shortToast(getContext(), "别点，我怕痒~");
+                ToastUtil.shortToast(requireContext(), "别点，我怕痒~");
             }
         });
 
@@ -136,8 +137,9 @@ public class RecordsBookmarkFragment extends Fragment {
         if (searchResult.size() == 0){
             searchResult.add(false);
         }
-        binding = DataBindingUtil.setContentView(requireActivity(), R.layout.activity_bookmark);
+
         initView();//初始化控件
+
         if(folderName.size() == 0){//初始化folder_name列表
             folderName.add("书签");
         }else if(!(searchResult.get(present) instanceof Boolean)){
@@ -154,16 +156,16 @@ public class RecordsBookmarkFragment extends Fragment {
         }
         bookmarkViewModel = new ViewModelProvider(this).get(BookmarkViewModel.class);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        bookmarkAdapter = new BookmarkAdapter(getContext());
+        bookmarkAdapter = new BookmarkAdapter(requireContext());
         bookmarkAdapter.setItemClick((View view, Bookmark bookmarkBean)-> {
             int imageOrText = view.getId();
             if (imageOrText == R.id.one_bookmark_text){
                 if(!isEdit){
                     if (bookmarkBean.getIsFolder() == 1) {//1代表点击的是文件夹
-                        actionStart(getContext(), bookmarkBean.getId(), bookmarkBean.getBname(), false);
+                        actionStart(requireContext(), bookmarkBean.getId(), bookmarkBean.getBname(), false);
                     } else {
                         //这里到时候实现点击跳转网页
-                        Intent intent = new Intent(getContext(), HomeActivity.class);
+                        Intent intent = new Intent(requireContext(), HomeActivity.class);
                         intent.putExtra("bookmark_url", bookmarkBean.getBurl());
                         startActivity(intent);
                     }
@@ -193,7 +195,7 @@ public class RecordsBookmarkFragment extends Fragment {
                 no_bookmark.setVisibility(View.GONE);
             }
         });
-        initListener();
+
         searchBookmark();
 
         return mView;
@@ -235,78 +237,94 @@ public class RecordsBookmarkFragment extends Fragment {
 
     //初始化控件
     private void initView(){
-        //控件初始化
-        recyclerView = binding.bookmarkShow;
-        //初始化顶部工具栏
-        base_top = binding.baseTop;
-        present_name = binding.presentName;
-        upper_name = binding.upperName;
-        checked_top = binding.checkedTop;
-        checked_all = binding.checkedAll;
-        checked_num = binding.checkedNum;
-        //顶部返回上一级的按钮
-        back_upper = binding.backUpper;
-        //中间提示没有书签
-        no_bookmark = binding.noBookmark;
-        //顶部的搜索输入框
-        search_layout = binding.searchLayout;
-        search_input = binding.searchInput;
-        //初始化底部工具栏
-        base_bottom = binding.baseBottom;
-        checked_bottom = binding.checkedBottom;
+
+
+        recyclerView = mView.findViewById(R.id.bookmark_show);
+        base_top = mView.findViewById(R.id.base_top);
+        present_name = mView.findViewById(R.id.present_name);
+        upper_name = mView.findViewById(R.id.upper_name);
+        checked_top = mView.findViewById(R.id.checked_top);
+        checked_num = mView.findViewById(R.id.checked_num);
+        back_upper = mView.findViewById(R.id.back_upper);
+        no_bookmark = mView.findViewById(R.id.no_bookmark);
+        search_layout = mView.findViewById(R.id.search_layout);
+        search_input = mView.findViewById(R.id.search_input);
+        base_bottom = mView.findViewById(R.id.base_bottom);
+        checked_bottom = mView.findViewById(R.id.checked_bottom);
+        
+        
+        
+        Ll_new_folder = mView.findViewById(R.id.new_folder);
+        Ll_edit = mView.findViewById(R.id.edit);
+        Tv_checked_all = mView.findViewById(R.id.checked_all);
+        Tv_checked_cancel = mView.findViewById(R.id.checked_cancel);
+        Ll_checked_delete = mView.findViewById(R.id.checked_delete);
+        Ll_search = mView.findViewById(R.id.search);
+        Iv_input_cleear = mView.findViewById(R.id.input_cleear);
+        Iv_back_upper = mView.findViewById(R.id.back_upper);
+        Ll_checked_move = mView.findViewById(R.id.checked_move);
+
+        Ll_new_folder.setOnClickListener(this);
+        Ll_edit.setOnClickListener(this);
+        Tv_checked_all.setOnClickListener(this);
+        Tv_checked_cancel.setOnClickListener(this);
+        Ll_checked_delete.setOnClickListener(this);
+        Ll_search.setOnClickListener(this);
+        Iv_input_cleear.setOnClickListener(this);
+        Iv_back_upper.setOnClickListener(this);
+        Ll_checked_move.setOnClickListener(this);
     }
+    
 
     //初始化底部工具栏监听
-    private void initListener() {
-        binding.setOperationclick((View v) -> {
-            int bottom_id = v.getId();
-            if (bottom_id == R.id.button_new_folder){//添加新文件夹
-                newFolderDialog(getContext());
-            }else if (bottom_id == R.id.edit){//编辑
-                loadEditOperation();//加载编辑的界面
-            }else if (bottom_id == R.id.checked_all){//全选
-                if (!isCheckedAll) {
-                    isCheckedAll = true;
-                    checkedAll();//全选
-                } else {
-                    isCheckedAll = false;
-                    checkedNone();//全不选
-                }
-            }else if(bottom_id == R.id.checked_cancel || bottom_id == R.id.checked_close){//取消，关闭
-                showBaseTopBottom();
-            }else if (bottom_id == R.id.checked_delete){//删除
-                checkedDelete(bookmarkAdapter.getCheckedItems());
-            }else if(bottom_id == R.id.search){//搜索
-                if (isOpenSearch) {
-                    search_layout.setVisibility(View.GONE);
-                    isOpenSearch = false;
-                } else {
-                    search_layout.setVisibility(View.VISIBLE);
-                    isOpenSearch = true;
-                }
-            }else if (bottom_id == R.id.input_cleear){//清空输入框
-                if (search_input.getText().toString().trim().length() != 0) {
-                    search_input.setText("");
-                }
-            }else if(bottom_id == R.id.back_upper) {
-                onBackPressed();//返回上一级
-            }else if (bottom_id == R.id.checked_move){//转移至
-                if (bookmarkAdapter.getCheckedItems().size() == 0) {
-                    ToastUtil.shortToast(getContext(),"未选中任何书签");
-                } else {
-                    moveBookmark(getContext());//弹出文件夹选择框并选择合适的文件夹
-                }
+    @Override
+    public void onClick(View v) {
+        int bottom_id = v.getId();
+        if (bottom_id == R.id.new_folder){//添加新文件夹
+            newFolderDialog(requireContext());
+        }else if (bottom_id == R.id.edit){//编辑
+            loadEditOperation();//加载编辑的界面
+        }else if (bottom_id == R.id.checked_all){//全选
+            if (!isCheckedAll) {
+                isCheckedAll = true;
+                checkedAll();//全选
+            } else {
+                isCheckedAll = false;
+                checkedNone();//全不选
             }
-        });
+        }else if(bottom_id == R.id.checked_cancel || bottom_id == R.id.checked_close){//取消，关闭
+            showBaseTopBottom();
+        }else if (bottom_id == R.id.checked_delete){//删除
+            checkedDelete(bookmarkAdapter.getCheckedItems());
+        }else if(bottom_id == R.id.search){//搜索
+            if (isOpenSearch) {
+                search_layout.setVisibility(View.GONE);
+                isOpenSearch = false;
+            } else {
+                search_layout.setVisibility(View.VISIBLE);
+                isOpenSearch = true;
+            }
+        }else if (bottom_id == R.id.input_cleear){//清空输入框
+            if (search_input.getText().toString().trim().length() != 0) {
+                search_input.setText("");
+            }
+        }else if(bottom_id == R.id.back_upper) {
+            onBackPressed();//返回上一级
+        }else if (bottom_id == R.id.checked_move){//转移至
+            if (bookmarkAdapter.getCheckedItems().size() == 0) {
+                ToastUtil.shortToast(requireContext(),"未选中任何书签");
+            } else {
+                moveBookmark(requireContext());//弹出文件夹选择框并选择合适的文件夹
+            }
+        }
     }
-
 
     //搜索
     public void searchBookmark(){
         search_input.setOnEditorActionListener((TextView v, int actionId, KeyEvent event)-> {
             if(actionId == EditorInfo.IME_ACTION_SEARCH){
                 //-2代表执行搜索，跳转到搜索结果界面
-                actionStart(getContext(),-2,"搜索结果",v.getText().toString());
+                actionStart(requireContext(),-2,"搜索结果",v.getText().toString());
             }
             return false;
         });
@@ -318,7 +336,7 @@ public class RecordsBookmarkFragment extends Fragment {
             showBaseTopBottom();
         }else{//当前并未处于编辑状态
             if(bookmarkAdapter.getItemCount() == 0){
-                ToastUtil.shortToast(getContext(),"无书签可编辑");
+                ToastUtil.shortToast(requireContext() ,"无书签可编辑");
                 return;
             }
             showEditTopBottom();
@@ -336,7 +354,7 @@ public class RecordsBookmarkFragment extends Fragment {
         checked_top.setVisibility(View.VISIBLE);
         base_bottom.setVisibility(View.GONE);
         checked_bottom.setVisibility(View.VISIBLE);
-        checked_all.setText("全选");
+        Tv_checked_all.setText("全选");
         checked_num.setText("已选择0项");
         bookmarkAdapter.notifyDataSetChanged();
     }
@@ -356,7 +374,7 @@ public class RecordsBookmarkFragment extends Fragment {
     //对所要删除的书签进行处理，得到最终所要删除的实体集
     public void checkedDelete(List<Bookmark> checkedItems){
         if (checkedItems.size() == 0){
-            Toast.makeText(getContext(), "无内容可删除", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "无内容可删除", Toast.LENGTH_SHORT).show();
             return;
         }
         List<Bookmark> needDelete = new ArrayList<>(checkedItems);
@@ -367,7 +385,7 @@ public class RecordsBookmarkFragment extends Fragment {
                 needDelete.addAll(bookmarkViewModel.getBookmarkOfSubfolder(needDelete.get(i).getId(), isFolders));
             }
         }
-        deleteAffirm(getContext(), needDelete, checkedItems.size(), upper);
+        deleteAffirm(requireContext(), needDelete, checkedItems.size(), upper);
     }
 
     //弹窗确认删除
@@ -390,7 +408,7 @@ public class RecordsBookmarkFragment extends Fragment {
                 //根据当前层的id更新上一层文件夹所拥有的标签数目（注意是减去，记得加负号）
                 bookmarkViewModel.updateBookmark(upper, -num);
                 dialog.dismiss();
-                ToastUtil.shortToast(getContext(),"删除成功");
+                ToastUtil.shortToast(requireContext(),"删除成功");
             }
         });
     }
@@ -404,7 +422,7 @@ public class RecordsBookmarkFragment extends Fragment {
         }
         bookmarkAdapter.setMap(map);
         bookmarkAdapter.notifyDataSetChanged();
-        checked_all.setText("全不选");
+        Tv_checked_all.setText("全不选");
         String selectedNum = "已选择" + num + "项";
         checked_num.setText(selectedNum);
     }
@@ -417,14 +435,14 @@ public class RecordsBookmarkFragment extends Fragment {
         }
         bookmarkAdapter.setMap(map);
         bookmarkAdapter.notifyDataSetChanged();
-        checked_all.setText("全选");
+        Tv_checked_all.setText("全选");
         checked_num.setText("已选择0项");
     }
 
     //点击书签图标弹出菜单
     public void loadPopupMenu(View view, Bookmark bookmarkBean){
         //创建弹出式菜单对象（最低版本11）
-        PopupMenu popup = new PopupMenu(getContext(), view);//第二个参数是绑定的那个view
+        PopupMenu popup = new PopupMenu(requireContext(), view);//第二个参数是绑定的那个view
         //获取菜单填充器
         MenuInflater inflater = popup.getMenuInflater();
         //填充菜单
@@ -435,14 +453,14 @@ public class RecordsBookmarkFragment extends Fragment {
         popup.setOnMenuItemClickListener((MenuItem item)-> {
             int itemId = item.getItemId();
             if (itemId == R.id.action_alter){
-                loadAlterDialog(getContext(), bookmarkBean);
+                loadAlterDialog(requireContext(), bookmarkBean);
             }else if (itemId == R.id.action_delete){//删除操作
                 List<Bookmark> checkedItems = new ArrayList<>();
                 checkedItems.add(bookmarkBean);
                 checkedDelete(checkedItems);//删除
             }else if (itemId == R.id.action_copy_url){
-                copyContent(getContext(),bookmarkBean.getBurl());
-                ToastUtil.shortToast(getContext(),"复制成功");
+                copyContent(requireContext(),bookmarkBean.getBurl());
+                ToastUtil.shortToast(requireContext(),"复制成功");
             }
             return false;
         });
@@ -492,7 +510,7 @@ public class RecordsBookmarkFragment extends Fragment {
             int[] isFolders = {1};
             Integer isexit = bookmarkViewModel.isNewBookmarkNameExit(alterNameString, isFolders);
             if (isexit == 1){
-                ToastUtil.shortToast(getContext(),"名称已存在");
+                ToastUtil.shortToast(requireContext(),"名称已存在");
             }else{
                 alterBookmark(bookmarkBean, alterNameString, "");//进行数据修改操作
                 dialog.dismiss();
@@ -502,9 +520,9 @@ public class RecordsBookmarkFragment extends Fragment {
             Integer isNameExit = bookmarkViewModel.isNewBookmarkNameExit(alterNameString, isFolders);
             Integer isUrlExit = bookmarkViewModel.isNewUrlExit(alterUrlString);
             if (isNameExit == 1){
-                ToastUtil.shortToast(getContext(),"名称已存在");
+                ToastUtil.shortToast(requireContext(),"名称已存在");
             }else if(isUrlExit == 1) {
-                ToastUtil.shortToast(getContext(),"网址已存在");
+                ToastUtil.shortToast(requireContext(),"网址已存在");
             }else{
                 alterBookmark(bookmarkBean, alterNameString, alterUrlString);
                 dialog.dismiss();
@@ -517,13 +535,13 @@ public class RecordsBookmarkFragment extends Fragment {
         bookmarkBean.setBname(name);
         bookmarkBean.setBurl(url);
         bookmarkViewModel.alterBookmark(bookmarkBean);
-        ToastUtil.shortToast(getContext(),"修改成功");
+        ToastUtil.shortToast(requireContext(),"修改成功");
     }
 
     //判断所输入的名称是否为空
     public boolean isNameNull(String name){
         if(name.trim().length() == 0){
-            ToastUtil.shortToast(getContext(),"名称不能为空");
+            ToastUtil.shortToast(requireContext(),"名称不能为空");
             return false;
         }
         return true;
@@ -532,7 +550,7 @@ public class RecordsBookmarkFragment extends Fragment {
     //判断网址的格式是否正确，并且是否为空
     public boolean isUrlFaultOrNull(String url){
         if (url.trim().length() == 0){
-            ToastUtil.shortToast(getContext(),"网址不能为空");
+            ToastUtil.shortToast(requireContext(),"网址不能为空");
             return true;
         }else{
 //            String regex = "(ht|f)tp(s?)\\:\\/\\/[0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])*(:(0-9)*)*(\\/?)([a-zA-Z0-9\\-\\.\\?\\,\\'\\/\\\\&%\\+\\$#_=]*)?";
@@ -541,7 +559,7 @@ public class RecordsBookmarkFragment extends Fragment {
             Matcher mat = pat.matcher(url.trim());
             boolean result = mat.matches();
             if (!result){
-                ToastUtil.shortToast(getContext(),"网址格式不正确");
+                ToastUtil.shortToast(requireContext(),"网址格式不正确");
                 return true;
             }
         }
@@ -554,12 +572,12 @@ public class RecordsBookmarkFragment extends Fragment {
         int[] isFolders = {1};
         Integer isexit = bookmarkViewModel.isNewBookmarkNameExit(name, isFolders);
         if(isexit == 1){
-            ToastUtil.shortToast(getContext(),"文件名已经存在，请重新输入");
+            ToastUtil.shortToast(requireContext(),"文件名已经存在，请重新输入");
         }else{
             Integer maxsort = bookmarkViewModel.getMaxSort(now_id);
             bookmarkViewModel.insertBookmark(new Bookmark(name,"","",0,1, now_id, maxsort == null?0:maxsort+1));
             bookmarkViewModel.updateBookmark(now_id, 1);//更新书签数目
-            ToastUtil.shortToast(getContext(),"新增文件夹成功");
+            ToastUtil.shortToast(requireContext(),"新增文件夹成功");
             dialog.dismiss();//关闭弹窗
         }
     }
@@ -650,7 +668,7 @@ public class RecordsBookmarkFragment extends Fragment {
                 dialog.dismiss();
             }else if (cancelOrAffirm == R.id.move_affirm){
                 if (movetoId[0] == -1){
-                    ToastUtil.shortToast(getContext(),"未选中任何文件夹");
+                    ToastUtil.shortToast(requireContext(),"未选中任何文件夹");
                 }else {
                     int checkedNum = checkedItems.size();
                     //更新所要移动到的文件夹的标签数
@@ -666,10 +684,12 @@ public class RecordsBookmarkFragment extends Fragment {
                     }
                     //更新所选书签的上一层文件夹的标签数(负数)
                     bookmarkViewModel.updateBookmark(now_id,-checkedNum);
-                    ToastUtil.shortToast(getContext(),"移动成功");
+                    ToastUtil.shortToast(requireContext(),"移动成功");
                     dialog.dismiss();
                 }
             }
         });
     }
+
+
 }

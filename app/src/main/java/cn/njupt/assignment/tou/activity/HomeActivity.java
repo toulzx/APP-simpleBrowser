@@ -42,7 +42,10 @@ import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
+import cn.njupt.assignment.tou.callback.BookmarkAddCallbackListener;
 import cn.njupt.assignment.tou.callback.InputStatusCallbackListener;
+import cn.njupt.assignment.tou.dao.BookmarkDao;
+import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
 import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
@@ -54,6 +57,7 @@ import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.UrlUtil;
 import cn.njupt.assignment.tou.utils.WebViewFragment;
 import cn.njupt.assignment.tou.utils.WebViewHelper;
+import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
 import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
@@ -73,6 +77,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private Intent intentOfHistory;
     private HistoryRecordViewModel historyRecordViewModel;
     private BookmarkRepository bookmarkRepository;
+
+    private BookmarkViewModel mBookmarkViewModel;
 
     private Context mContext;
     private FragmentManager mFragmentManager;
@@ -99,6 +105,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         super.onCreate(savedInstanceState);
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
+        mBookmarkViewModel = new ViewModelProvider(this).get(BookmarkViewModel.class);
         setContentView(R.layout.activity_home);
 
         mContext = this;
@@ -493,6 +500,13 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        OptionsInDialogFragment.SetBookmarkAddCallbackListener(new BookmarkAddCallbackListener() {
+            @Override
+            public void addBookmark() {
+                mBookmarkViewModel.insertBookmark(new Bookmark(mWebView.getTitle(), mWebView.getUrl(), UrlUtil.getIconUrl(mWebView.getUrl()), 0, 0, -1, mBookmarkViewModel.getMaxSort(-1) + 1));
+            }
+        });
+
     }
 
     /**
@@ -530,7 +544,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 return true;
             } catch (Exception e) {
-                return true;
+                return false;
             }
 
         }

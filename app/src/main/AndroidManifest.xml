@@ -24,7 +24,7 @@
             android:name=".activity.HomeActivity"
             android:exported="true"
             android:screenOrientation="unspecified"
-            android:configChanges="screenSize|orientation"
+            android:configChanges="orientation"
             android:windowSoftInputMode="adjustUnspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

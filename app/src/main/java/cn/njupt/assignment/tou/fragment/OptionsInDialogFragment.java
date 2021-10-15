@@ -14,6 +14,7 @@ import android.widget.Switch;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -23,10 +24,12 @@ import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
-import cn.njupt.assignment.tou.callback.InputStatusCallbackListener;
+import cn.njupt.assignment.tou.callback.BookmarkAddCallbackListener;
 import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
+import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.utils.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
+import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
 
 public class OptionsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener, SwitchCompat.OnCheckedChangeListener {
 
@@ -38,12 +41,18 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
     private BottomSheetBehavior<View> mBottomSheetBehavior;
 
     private ImageButton mBtnCancel;
+    private ConstraintLayout mClOptionsBookmarkAdd;
     private Switch mStOrientation, mStGraphless, mStPrivate;
+    private ConstraintLayout mClOptions;
 
     public static OptionsGraphlessModeCallbackListener mGraphlessModeCallbackListener;
+    public static BookmarkAddCallbackListener mBookmarkAddCallbackListener;
 
     public static void SetGraphlessModeCallbackListener(OptionsGraphlessModeCallbackListener listener) {
         mGraphlessModeCallbackListener = listener;
+    }
+    public static void SetBookmarkAddCallbackListener(BookmarkAddCallbackListener listener) {
+        mBookmarkAddCallbackListener = listener;
     }
 
 
@@ -75,6 +84,8 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
         mStOrientation = mView.findViewById(R.id.switch_orientation_lock);
         mStGraphless = mView.findViewById(R.id.switch_graphless_mode);
         mStPrivate = mView.findViewById(R.id.switch_private_mode);
+        mClOptions = mView.findViewById(R.id.options_header_container);
+        mClOptionsBookmarkAdd = mView.findViewById(R.id.option_bookmark_add);
 
         // set status
         if (!Objects.equals(OptionSPHelper.getLockOrientationValue(), "auto")) {
@@ -87,11 +98,18 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
             mStPrivate.setChecked(true);
         }
 
+        // initialize layout based on orientation
+        Configuration configuration = getResources().getConfiguration();
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mClOptions.setVisibility(View.GONE);
+        }
+
         // set listener
         mBtnCancel.setOnClickListener(this);
         mStOrientation.setOnCheckedChangeListener(this);
         mStGraphless.setOnCheckedChangeListener(this);
         mStPrivate.setOnCheckedChangeListener(this);
+        mClOptionsBookmarkAdd.setOnClickListener(this);
 
         return mBottomSheetDialog;
     }
@@ -125,8 +143,29 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
             // 设置合起状态
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
+        } else if (view.getId() == R.id.option_bookmark_add) {
+
+            mBookmarkAddCallbackListener.addBookmark();
+
         }
 
+    }
+
+    /**
+     * 监听旋转状态的改变
+     * @param newConfig:
+     * @return void
+     * @date 2021/10/15 19:09
+     * @author tou
+     */
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mClOptions.setVisibility(View.GONE);
+        } else {
+            mClOptions.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
