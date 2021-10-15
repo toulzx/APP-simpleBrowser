@@ -24,12 +24,14 @@ public class OptionSPHelper {
     public static final String SP_NAME = "userSetting";
 
     private static final String KEY_FIRST_TIME_USED = "firstTimeUsed";
+    public static final String KEY_FORCE_FULL_SCREEN = "forceFullScreen";
     public static final String KEY_LOCK_ORIENTATION = "lockOrientation";
     public static final String KEY_PRIVATE_MODE = "privateMode";
     public static final String KEY_GRAPHLESS_MODE = "graphlessMode";
 
     private static final String VALUE_FIRST_TIME_USED = "true";
     private static final String VALUE_NOT_FIRST_TIME_USED = "false";
+    public static final String VALUE_DEFAULT_FORCE_FULL_SCREEN = "false";
     public static final String VALUE_DEFAULT_LOCK_ORIENTATION = "vertical";     // vertical horizontal auto
     public static final String VALUE_DEFAULT_PRIVATE_MODE = "false";
     public static final String VALUE_DEFAULT_GRAPHLESS_MODE = "false";
@@ -60,6 +62,7 @@ public class OptionSPHelper {
 
             editor.putString(KEY_FIRST_TIME_USED, VALUE_NOT_FIRST_TIME_USED);
 
+            editor.putString(KEY_FORCE_FULL_SCREEN, VALUE_DEFAULT_FORCE_FULL_SCREEN);
             editor.putString(KEY_LOCK_ORIENTATION, VALUE_DEFAULT_LOCK_ORIENTATION);
             editor.putString(KEY_PRIVATE_MODE, VALUE_DEFAULT_PRIVATE_MODE);
             editor.putString(KEY_GRAPHLESS_MODE, VALUE_DEFAULT_GRAPHLESS_MODE);
@@ -73,6 +76,7 @@ public class OptionSPHelper {
 
     /**
      * 修改 SharedPReferences 中所有的数据，不需要修改的填写 null
+     * @param forceFullScreen: 强制全屏模式设定值：true,false
      * @param orientation: 屏幕方向的设定值：vertical,horizontal,auto
      * @param privateMode: 无痕模式的设定值：true,false
      * @param graphlessMode:  无图模式的设定值：true,false
@@ -80,7 +84,7 @@ public class OptionSPHelper {
      * @date 2021/10/14 17:15
      * @author tou
      */
-    public static void setValue(String orientation, String privateMode, String graphlessMode) {
+    public static void setValue(String forceFullScreen, String orientation, String privateMode, String graphlessMode) {
 
         if (mApp == null) {
             Log.e(TAG, "在使用本类方法之前，请先调用初始化函数 init() ！！！");
@@ -89,6 +93,7 @@ public class OptionSPHelper {
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
 
+        if (forceFullScreen != null) { editor.putString(KEY_FORCE_FULL_SCREEN, forceFullScreen); }
         if (orientation != null) { editor.putString(KEY_LOCK_ORIENTATION, orientation); }
         if (privateMode != null) { editor.putString(KEY_PRIVATE_MODE, privateMode); }
         if (graphlessMode != null) { editor.putString(KEY_GRAPHLESS_MODE, graphlessMode); }
@@ -113,11 +118,29 @@ public class OptionSPHelper {
 
         Map <String,String> map = new HashMap<>();
 
+        map.put(KEY_FORCE_FULL_SCREEN, getForceFullScreenValue());
         map.put(KEY_LOCK_ORIENTATION, getLockOrientationValue());
         map.put(KEY_PRIVATE_MODE, getPrivateModeValue());
         map.put(KEY_GRAPHLESS_MODE, getGraphlessModeValue());
 
         return map;
+
+    }
+
+    /**
+     * 强制全屏模式设定值：true,false
+     * @return java.lang.String
+     * @date 2021/10/15 14:35
+     * @author tou
+     */
+    public static String getForceFullScreenValue() {
+
+        if (mApp == null) {
+            Log.e(TAG, "getForceFullScreenValue(): 在使用本类方法之前，请先调用初始化函数 init() ！！！");
+            return null;
+        }
+
+        return mSharedPreferences.getString(KEY_FORCE_FULL_SCREEN, VALUE_WRONG);
 
     }
 

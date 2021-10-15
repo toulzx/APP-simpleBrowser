@@ -14,7 +14,6 @@ import android.widget.Switch;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -24,6 +23,7 @@ import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
+import cn.njupt.assignment.tou.callback.InputStatusCallbackListener;
 import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
 import cn.njupt.assignment.tou.utils.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
@@ -38,7 +38,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
     private BottomSheetBehavior<View> mBottomSheetBehavior;
 
     private ImageButton mBtnCancel;
-    private Switch mStGraphless, mStOrientation, mStPrivate;
+    private Switch mStOrientation, mStGraphless, mStPrivate;
 
     public static OptionsGraphlessModeCallbackListener mGraphlessModeCallbackListener;
 
@@ -122,7 +122,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
         if (view.getId() == R.id.options_button_cancel) {
 
-            //设置合起状态
+            // 设置合起状态
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         }
@@ -148,20 +148,20 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
                 // 如果当前是横屏，锁定横屏
                 if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    OptionSPHelper.setValue("horizontal", null, null);
+                    OptionSPHelper.setValue(null,"horizontal", null, null);
                     ToastUtil.shortToast(requireContext(), "锁定横屏啦");
                 }
                 // 如果当前是竖屏，锁定竖屏
                 if(configuration.orientation==Configuration.ORIENTATION_PORTRAIT){
                     requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    OptionSPHelper.setValue("vertical", null, null);
+                    OptionSPHelper.setValue(null, "vertical", null, null);
                     ToastUtil.shortToast(requireContext(), "锁定竖屏啦");
                 }
 
             } else {
                 // 如果关闭开关，则取消锁定
                 requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                OptionSPHelper.setValue("auto", null, null);
+                OptionSPHelper.setValue(null, "auto", null, null);
             }
 
         } else if (buttonView.getId() == R.id.switch_graphless_mode) {
@@ -174,7 +174,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
                     mGraphlessModeCallbackListener.setGraphlessMode(HomeActivity.ALLOW_IMAGE_LOADED);
                 }
 
-                OptionSPHelper.setValue(null, null, String.valueOf(isChecked));
+                OptionSPHelper.setValue(null, null, null, String.valueOf(isChecked));
 
             } else {
 
@@ -184,7 +184,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
         } else if (buttonView.getId() == R.id.switch_private_mode) {
 
-            OptionSPHelper.setValue(null, String.valueOf(isChecked), null);
+            OptionSPHelper.setValue(null, null, String.valueOf(isChecked), null);
 
         }
     }

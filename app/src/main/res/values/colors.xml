@@ -15,7 +15,7 @@
     <color name="transparent">#00000000</color>
 
     <color name="safari_background_deep_grey">#cccdd3</color>
-    <color name="safari_background_grey_day">#f7f7f7</color>
+    <color name="safari_background_grey_day">#f4f4f4</color>
     <color name="safari_original_blue_day">#3478f6</color>
     <color name="safari_light_blue">#5a91f7</color>
 </resources>
