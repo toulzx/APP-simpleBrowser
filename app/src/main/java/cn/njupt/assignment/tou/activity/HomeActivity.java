@@ -38,13 +38,18 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
+import cn.njupt.assignment.tou.callback.InputStatusCallbackListener;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
+import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
+import cn.njupt.assignment.tou.fragment.OptionsInDialogFragment;
 import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
 import cn.njupt.assignment.tou.repository.BookmarkRepository;
+import cn.njupt.assignment.tou.utils.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.UrlUtil;
 import cn.njupt.assignment.tou.utils.WebViewFragment;
@@ -59,6 +64,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private EditText mSearch;
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
+
+    WebSettings mWebSettings;
 
     private BarFooterFragment mFooter;
     private BarHeaderFragment mHeader;
@@ -81,8 +88,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private static final int SCREEN_ORIENTATION_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     private static final int SCREEN_ORIENTATION_UNSPECIFIED = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
-    private static final int ALLOW_IMAGE_LOADED = 1;
-    private static final int PROHIBIT_IMAGE_LOADED = 0;
+    public static final int ALLOW_IMAGE_LOADED = 1;
+    public static final int PROHIBIT_IMAGE_LOADED = 0;
 
     private BottomSheetDialog bottomSheetDialog;
 
@@ -101,6 +108,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         initUI();
 
         initWebView();
+
+        initData();
 
     }
 
@@ -129,17 +138,23 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onBackPressed() {
-        if (mWebView.canGoBack()) {
-            mWebView.goBack();
+        if (Objects.equals(OptionSPHelper.getForceFullScreenValue(), String.valueOf(true))) {
+            // 关闭强制全屏选项
+            OptionSPHelper.setValue(String.valueOf(false), null, null, null);
+            // 重现 bar 栏
+            setBarStatus(false);
         } else {
-            if ((System.currentTimeMillis() - exitTime) > PRESS_BACK_EXIT_GAP) {
-                // 连点两次退出程序
-                ToastUtil.shortToast(mContext, "再按一次退出程序");
-                exitTime = System.currentTimeMillis();
+            if (mWebView.canGoBack()) {
+                mWebView.goBack();
             } else {
-                super.onBackPressed();
+                if ((System.currentTimeMillis() - exitTime) > PRESS_BACK_EXIT_GAP) {
+                    // 连点两次退出程序
+                    ToastUtil.shortToast(mContext, "再按一次退出程序");
+                    exitTime = System.currentTimeMillis();
+                } else {
+                    super.onBackPressed();
+                }
             }
-
         }
     }
 
@@ -200,67 +215,66 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mWebView.setWebViewClient(new sWebViewClient(){});
         mWebView.setWebChromeClient(new sWebChromeClient(){});
 
+        /* 重写 WebView 的 onScroll 实现自适应全屏模式 */
         mWebView.setOnScrollChangedCallback(new sWebView.OnScrollChangedCallback(){
             public void onScroll(int dx, int dy){
-                //这里我们根据dx和dy参数做自己想做的事情
-                FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+                // 判断是否启动了强制全屏模式
+                if (Objects.equals(OptionSPHelper.getForceFullScreenValue(), String.valueOf(true))) return;
+                // 自适应全屏
                 if (dy > 25) {
-                    fragmentTransaction.hide(mFooter);
-                    fragmentTransaction.hide(mHeader);
+                    setBarStatus(true);
                 } else if ( dy < -25 ) {
-                    fragmentTransaction.show(mFooter);
-                    fragmentTransaction.show(mHeader);
+                    setBarStatus(false);
                 }
-                fragmentTransaction.commit();
             }
         });
 
 
         /* 设置 */
 
-        WebSettings settings = mWebView.getSettings();
+        mWebSettings = mWebView.getSettings();
 
         // 设置默认编码格式
-        settings.setDefaultTextEncodingName("utf-8");
+        mWebSettings.setDefaultTextEncodingName("utf-8");
         // 设置浏览器 UserAgent
-        settings.setUserAgentString(settings.getUserAgentString() + "; " + getResources().getString(R.string.user_agent_detail));
+        mWebSettings.setUserAgentString(mWebSettings.getUserAgentString() + "; " + getResources().getString(R.string.user_agent_detail));
 //        settings.setUserAgentString("Android");
 
         // 启用 js 功能
-        settings.setJavaScriptEnabled(true);
+        mWebSettings.setJavaScriptEnabled(true);
         // 支持通过JS打开新窗口
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        mWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         // 使用网页元标记中定义的属性加载 WebView
-        settings.setUseWideViewPort(true);
+        mWebSettings.setUseWideViewPort(true);
 
         // 支持缩放，默认为true。是下面那个的前提。
-        settings.setSupportZoom(true);
+        mWebSettings.setSupportZoom(true);
         // 设置内置的缩放控件。
-        settings.setBuiltInZoomControls(true);
+        mWebSettings.setBuiltInZoomControls(true);
         // 隐藏原生的缩放控件
-        settings.setDisplayZoomControls(false);
+        mWebSettings.setDisplayZoomControls(false);
         // 缩放至屏幕的大小
-        settings.setLoadWithOverviewMode(true);
+        mWebSettings.setLoadWithOverviewMode(true);
 
         // 设置可以访问文件
-        settings.setAllowFileAccess(true);
+        mWebSettings.setAllowFileAccess(true);
         // 启用本地缓存
-        settings.setDomStorageEnabled(true);
-        settings.setAppCacheEnabled(true);      // 不推荐使用？弃用？
+        mWebSettings.setDomStorageEnabled(true);
+        mWebSettings.setAppCacheEnabled(true);      // 不推荐使用？弃用？
         // 设置缓存文件路径
         String appCacheDir = this.getBaseContext().getCacheDir().getAbsolutePath(); // /data/user/0/cn.njupt.assignment.tou/cache
 //        String appCacheDir = this.getApplicationContext().getDir("cache", Context.MODE_PRIVATE).getPath();    // /data/user/0/cn.njupt.assignment.tou/app_cache
-        settings.setAppCachePath(appCacheDir);
+        mWebSettings.setAppCachePath(appCacheDir);
         // 设置缓存模式
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        mWebSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         // 启用自动加载图片
-        settings.setLoadsImagesAutomatically(true);
-        settings.setBlockNetworkImage(false);
+        mWebSettings.setLoadsImagesAutomatically(true);
+        mWebSettings.setBlockNetworkImage(false);
 
         // HTTP与HTTPS混合加载模式（注：application 中需启用 android:usesCleartextTraffic="true"）
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        mWebSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         intentOfHistory =getIntent();
         String historyUrl = intentOfHistory.getStringExtra("history_url");
@@ -282,7 +296,34 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         WebViewHelper.headWebView = WebViewHelper.currentWebView;
 
+    }
 
+    /**
+     *初始化 SharedPreferences 和控件
+     * @return void
+     * @date 2021/10/14 17:55
+     * @author tou
+     */
+    private void initData() {
+
+        OptionSPHelper.init(getApplication());
+
+        // set Orientation Mode
+        if (Objects.equals(OptionSPHelper.getLockOrientationValue(), "horizontal")) {
+            setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        } else if (Objects.equals(OptionSPHelper.getLockOrientationValue(), "vertical")) {
+            setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        } else if (Objects.equals(OptionSPHelper.getLockOrientationValue(), "auto")) {
+            setScreenOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+
+        // set Graphless Mode
+        if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
+            setImageBlock(PROHIBIT_IMAGE_LOADED);
+        }
+
+        // no need to set PrivateMode here :-)
+        // no need to set FullScreenForce here :-)
 
     }
 
@@ -305,16 +346,17 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         if (id == R.id.img_view_resize) {
 
-            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
             if (mFooter.isHidden() || mHeader.isHidden()) {
-                fragmentTransaction.show(mFooter);
-                fragmentTransaction.show(mHeader);
+                setBarStatus(false);
             } else {
-                fragmentTransaction.hide(mFooter);
-                fragmentTransaction.hide(mHeader);
+                setBarStatus(true);
             }
-            fragmentTransaction.commit();
+
+            // 设置强制全屏
+            OptionSPHelper.setValue(String.valueOf(true), null, null, null);
+
+            // 回调 HomeActivity 使 Bar 栏消失
+            setBarStatus(true);
 
         } else if (id == R.id.img_view_reload) {
 
@@ -352,23 +394,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             mWebView.goForward();
 
         } else if (id == R.id.img_view_options) {
-            // TODO
-            ToastUtil.shortToast(mContext, "options 功能开发中");
+
+            new OptionsInDialogFragment().show(getSupportFragmentManager(), OptionsInDialogFragment.class.getSimpleName());
 
         } else if (id == R.id.img_view_records) {
-            // TODO: bottomSheetDiaLog
-//            bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialog);
-//            View view2 = LayoutInflater.from(this).inflate(R.layout.activity_records, null, false);
-//            bottomSheetDialog.setContentView(view2);
-//            bottomSheetDialog.show();
 
-            // TODO: Tablayout
-//            startActivity(new Intent(HomeActivity.this, newRecordsActivity.class));
-            new RecordsInDialogFragment().show(getSupportFragmentManager(), "newRecordsFragment");
-
-            /*TODO:午 测试*/
-//            Intent intent=new Intent(HomeActivity.this, DemoActivity.class);
-//            startActivity(intent);
+            new RecordsInDialogFragment().show(getSupportFragmentManager(), RecordsInDialogFragment.class.getSimpleName());
 
         } else if (id == R.id.img_view_pages) {
             // TODO
@@ -397,6 +428,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * 其它监听器的设置
      * - 地址输入栏失去焦点监听
      * - 监听键盘回车搜索
+     * - 回调函数
      * @return void
      * @date 2021/10/11 9:43
      * @author tou
@@ -412,7 +444,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     mSearch.setTextColor(ContextCompat.getColor(mContext, R.color.edit_text_color));
                     mSearch.setText(mWebView.getUrl());
                     // 光标置于末尾
-                    mSearch.setSelection(mSearch.getText().length());
+                    mSearch.setSelection(0, mSearch.getText().length());
                     // 显示因特网图标
 //                    webIcon.setImageResource(R.drawable.internet);
                     // 显示跳转按钮
@@ -441,9 +473,27 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        /* 回调函数 */
+
+        // 无图模式
+        OptionsInDialogFragment.SetGraphlessModeCallbackListener(new OptionsGraphlessModeCallbackListener() {
+            @Override
+            public void setGraphlessMode(int flag) {
+                setImageBlock(flag);
+            }
+        });
+
+        // 网页内调用软键盘时
+        BarFooterFragment.SetInputStatusCallbackListener(new InputStatusCallbackListener() {
+            @Override
+            public void fullScreen(boolean isToHide) {
+                if (!mSearch.hasFocus()) {
+                    setBarStatus(isToHide);
+                }
+            }
+        });
+
     }
-
-
 
     /**
      * 重写 WebViewClient
@@ -526,26 +576,26 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             setTitle(mWebView.getTitle());
             mSearch.setText(mWebView.getTitle());
 
+            /* 保存网页功能 */
 //            String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
 //                    + File.separator + System.currentTimeMillis() + ".xml";
 //            mWebView.saveWebArchive(cacheFileName);
-
-            //记录浏览的历史记录
-            historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
-
             String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
             mWebView.saveWebArchive(cacheFileDir, true, new ValueCallback<String>() {
                 @Override
                 public void onReceiveValue(String value) {
-
                     if (value == null) {
                         Log.i(TAG, "onReceiveValue: saveWebArchive -> " + value);
                     } else {
                         Log.i(TAG, "onReceiveValue: saveWebArchive -> successfully in " + value);
                     }
-
                 }
             });
+
+            // 记录浏览的历史记录
+            if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(false))) {
+                historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
+            }
         }
 
 
@@ -588,9 +638,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             if ( lastProgress != WEB_PROGRESS_MAX && newProgress == WEB_PROGRESS_MAX ) {
                 lastProgress = newProgress;
-//                String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
-//                        + File.separator + System.currentTimeMillis() + ".mht";
-//                webView.saveWebArchive(cacheFileName);
             }
 
         }
@@ -613,7 +660,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         /**
          * 更新当前页面标题
-         * TODO: 可以不用
          * @param view:
          * @param title:
          * @return void
@@ -623,7 +669,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceivedTitle(WebView view, String title) {
             super.onReceivedTitle(view, title);
-//            setTitle(title);
             mSearch.setText(title);
         }
 
@@ -661,14 +706,36 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 预留接口：设置屏幕方向
-     * TODO: 设置页调用
+     * 设置 bar 栏的显示状态
+     * @param isToHide:  true:设置隐藏，false:设置显示
+     * @return void
+     * @date 2021/10/15 14:52
+     * @author tou
+     */
+    private void setBarStatus(boolean isToHide) {
+
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+        if (isToHide) {
+            fragmentTransaction.hide(mFooter);
+            fragmentTransaction.hide(mHeader);
+        } else {
+            fragmentTransaction.show(mFooter);
+            fragmentTransaction.show(mHeader);
+        }
+
+        fragmentTransaction.commit();
+
+    }
+
+    /**
+     * 设置屏幕方向
      * @return void
      * @date 2021/9/22 11:07
      * @author tou
      */
     @SuppressLint("SourceLockedOrientationActivity")
-    private void setScreenOrientation(int flag) {
+    public void setScreenOrientation(int flag) {
 
         switch (flag) {
             case SCREEN_ORIENTATION_LANDSCAPE:
@@ -685,25 +752,24 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 预留接口：设置是否自动加载图片
+     * 设置是否自动加载图片
+     * 注意 Options 中的设置通过回调函数实现
      * 注意 setLoadsImagesAutomatically 必须始终允许，它关联的不仅是网页上的图片。
-     * TODO: 设置页调用
      * @param flag:
-     * @param webSettings:
      * @return void
      * @date 2021/9/22 15:01
      * @author tou
      */
-    private void setImageBlock(int flag, WebSettings webSettings) {
+    public void setImageBlock(int flag) {
 
         switch (flag) {
             case ALLOW_IMAGE_LOADED:
-                webSettings.setLoadsImagesAutomatically(true);
-                webSettings.setBlockNetworkImage(false);
+                mWebSettings.setLoadsImagesAutomatically(true);
+                mWebSettings.setBlockNetworkImage(false);
                 break;
             case PROHIBIT_IMAGE_LOADED:
-                webSettings.setLoadsImagesAutomatically(true);
-                webSettings.setBlockNetworkImage(true);
+                mWebSettings.setLoadsImagesAutomatically(true);
+                mWebSettings.setBlockNetworkImage(true);
                 break;
         }
 

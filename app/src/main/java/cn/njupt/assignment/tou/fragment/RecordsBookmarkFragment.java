@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -32,8 +33,10 @@ import java.util.regex.Pattern;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.databinding.DataBindingUtil;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import androidx.lifecycle.LiveData;
@@ -52,11 +55,15 @@ import cn.njupt.assignment.tou.databinding.BookmarkNewFolderDialogBinding;
 import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
+import cn.njupt.assignment.tou.callback.RecordsBookmarkCallbackListener;
+import cn.njupt.assignment.tou.utils.ToastUtil;
 
 public class RecordsBookmarkFragment extends Fragment {
 
-    private static final String TAG= RecordsBookmarkFragment.class.getSimpleName();
+    private static final String TAG = RecordsBookmarkFragment.class.getSimpleName();
+
     private View mView;
+
     //记录书签的id，方便用id打开文件夹
     private static List<Integer> ids = new ArrayList<>();
     private static int present = 0;//记录当前位于第几层
@@ -97,18 +104,33 @@ public class RecordsBookmarkFragment extends Fragment {
     private static List<Object> searchResult = new ArrayList<>();//判断是否处于搜索状态
 
 
+    private AppCompatButton button;
+
+
+
     @Override
     public void onCreate(@Nullable Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
     }
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-       mView=inflater.inflate(R.layout.activity_bookmark,container,false);
+        if (mView == null) {
+            mView = inflater.inflate(R.layout.fragment_dialog_records_bookmark, container, false);
+        }
 
-       if (ids.size() == 0){//首次初始化列表ids，存-1
+        // 回调函数
+        RecordsInDialogFragment.setBookmarkCallBackListener(new RecordsBookmarkCallbackListener() {
+            @Override
+            public void onBookmarkButtonClick(View view) {
+                Log.i(TAG, "onButtonClick: 你好你好你好");
+                ToastUtil.shortToast(getContext(), "别点，我怕痒~");
+            }
+        });
+
+
+        if (ids.size() == 0){//首次初始化列表ids，存-1
             ids.add(-1);
         }
         if (searchResult.size() == 0){
@@ -174,8 +196,7 @@ public class RecordsBookmarkFragment extends Fragment {
         initListener();
         searchBookmark();
 
-
-       return mView;
+        return mView;
     }
 
     //启动活动所要执行的操作
@@ -421,7 +442,7 @@ public class RecordsBookmarkFragment extends Fragment {
                 checkedDelete(checkedItems);//删除
             }else if (itemId == R.id.action_copy_url){
                 copyContent(getContext(),bookmarkBean.getBurl());
-            ToastUtil.shortToast(getContext(),"复制成功");
+                ToastUtil.shortToast(getContext(),"复制成功");
             }
             return false;
         });
@@ -471,7 +492,7 @@ public class RecordsBookmarkFragment extends Fragment {
             int[] isFolders = {1};
             Integer isexit = bookmarkViewModel.isNewBookmarkNameExit(alterNameString, isFolders);
             if (isexit == 1){
-            ToastUtil.shortToast(getContext(),"名称已存在");
+                ToastUtil.shortToast(getContext(),"名称已存在");
             }else{
                 alterBookmark(bookmarkBean, alterNameString, "");//进行数据修改操作
                 dialog.dismiss();
@@ -651,11 +672,4 @@ public class RecordsBookmarkFragment extends Fragment {
             }
         });
     }
-
-
 }
-
-
-
-
-

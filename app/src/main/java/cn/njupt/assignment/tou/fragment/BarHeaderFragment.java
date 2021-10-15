@@ -13,10 +13,14 @@ import cn.njupt.assignment.tou.R;
 
 public class BarHeaderFragment extends Fragment {
 
+    private View mView;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_bar_header, container, false);
+        if (mView == null) {
+            mView = inflater.inflate(R.layout.fragment_bar_header, container, false);
+        }
+        return mView;
     }
 }

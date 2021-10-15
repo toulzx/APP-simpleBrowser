@@ -55,7 +55,6 @@ public class AutoMatchingActivity extends AppCompatActivity {
         recordOfSearch = findViewById(R.id.history_search_page_list);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(OrientationHelper.VERTICAL);
         recordOfSearch.setLayoutManager(linearLayoutManager);
 
 

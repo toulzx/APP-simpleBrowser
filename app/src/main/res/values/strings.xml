@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Safari</string>
-    <string name="home_url">https://baidu.com/</string>
+    <string name="home_url">https://www.baidu.com/</string>
     <string name="user_agent_detail">Safari In Android Designed By @toulzx</string>
     <string name="loading_hint">loading</string>
     <string name="edit_text_hint">搜索或输入网站名称</string>

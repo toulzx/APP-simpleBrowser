@@ -1,35 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/bottom_sheet_bg">
 
     <!-- 注意，应使用 LinearLayout 布局包裹，否则 Tabs 可能无法点击 -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout_records"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:background="@drawable/bottom_sheet_bg">
 
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_bookmark"
+        <TextView
+            android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="bookmark" />
+            android:text="Records"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_history"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="history" />
-    </com.google.android.material.tabs.TabLayout>
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginTop="9dp"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager_2_records"
         android:layout_width="match_parent"
-        android:layout_height="700dp" />
+        android:layout_height="450dp"
+        android:background="@color/white">
+
+    </androidx.viewpager2.widget.ViewPager2>
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@color/safari_background_grey_day">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout_records"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/tab_layout_bg"
+            app:layout_constraintBottom_toTopOf="@+id/btn_records_cancel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tabTextColor="@color/white">
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/tab_item_bookmark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="bookmark" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/tab_item_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="history" />
+        </com.google.android.material.tabs.TabLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_records_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:text="关闭"
+            android:textColor="@color/safari_light_blue"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tab_layout_records" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_records_ultra_set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:text="看情况显示"
+            android:textColor="@color/safari_light_blue"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tab_layout_records"
+            app:layout_constraintVertical_bias="1.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </LinearLayout>
 
