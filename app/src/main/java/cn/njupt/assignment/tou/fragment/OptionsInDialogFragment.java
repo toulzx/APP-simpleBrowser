@@ -182,7 +182,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
             }
 
-        } else if (buttonView.getId() == R.id.switch_graphless_mode) {
+        } else if (buttonView.getId() == R.id.switch_private_mode) {
 
             OptionSPHelper.setValue(null, String.valueOf(isChecked), null);
 

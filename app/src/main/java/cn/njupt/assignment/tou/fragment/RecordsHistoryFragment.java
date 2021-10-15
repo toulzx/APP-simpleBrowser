@@ -61,7 +61,7 @@ public class RecordsHistoryFragment extends Fragment {
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
         recyclerView = mView.findViewById(R.id.list_history_new);
 
-        initData();
+//        initData();
         recyclerView.setNestedScrollingEnabled(false);
 
         //添加RecyclerView管理器

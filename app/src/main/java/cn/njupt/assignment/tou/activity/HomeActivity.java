@@ -312,9 +312,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // no need to set Private Mode here :-)
-        if (Objects.equals(OptionSPHelper.getGraphlessModeValue(), String.valueOf(true))) {
-            //  TODO: 这里不用写。找到记录历史记录部分。直接设置 SharedPreferences
-        }
     }
 
 
@@ -569,7 +566,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 //            });
 
             //记录浏览的历史记录
-            if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(true))) {
+            if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(false))) {
                 historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
             }
         }
