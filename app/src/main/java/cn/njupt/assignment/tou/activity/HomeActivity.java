@@ -408,6 +408,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             new RecordsInDialogFragment().show(getSupportFragmentManager(), RecordsInDialogFragment.class.getSimpleName());
 
+
         } else if (id == R.id.img_view_pages) {
             // TODO
             // Toast.makeText(mContext, "pages 功能开发中", Toast.LENGTH_SHORT).show();

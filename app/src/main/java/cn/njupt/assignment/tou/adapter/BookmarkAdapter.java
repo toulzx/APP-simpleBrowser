@@ -94,13 +94,13 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.ViewHo
         binding.setItemclick(itemClick);
 //        holder.itemView.setTag(position);//设置Tag
         // TODO 复选框显示会使程序闪退！！！
-//        showCheckBox(binding, position, bookmarkBean);//显示复选框以进行编辑操作
+       showCheckBox(binding, position, bookmarkBean);//显示复选框以进行编辑操作
         binding.executePendingBindings();
     }
 
     //是否显示复选框
     public void showCheckBox(BookmarkItemBinding binding, int position, Bookmark bookmark){
-        //checkBox = binding.checkedItem;
+        checkBox = binding.checkedItem;
         if (isShowCheckBox == true){
             checkBox.setVisibility(View.VISIBLE);
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

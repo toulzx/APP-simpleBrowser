@@ -92,7 +92,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
     private LinearLayout search_layout;
     private EditText search_input;
     private ImageView back_upper;
-    
+
     private LinearLayout Ll_new_folder;
     private LinearLayout Ll_edit;
 
@@ -103,6 +103,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
 
     private TextView Tv_checked_cancel;
     private LinearLayout Ll_checked_delete;
+    private LinearLayout Ll_checked_close;
     private LinearLayout Ll_search;
     private ImageView Iv_input_cleear;
     private ImageView Iv_back_upper;
@@ -127,6 +128,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
             public void onBookmarkButtonClick(View view) {
                 Log.i(TAG, "onButtonClick: 你好你好你好");
                 ToastUtil.shortToast(requireContext(), "别点，我怕痒~");
+
             }
         });
 
@@ -137,7 +139,6 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
         if (searchResult.size() == 0){
             searchResult.add(false);
         }
-
         initView();//初始化控件
 
         if(folderName.size() == 0){//初始化folder_name列表
@@ -154,6 +155,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
         }else{
             back_upper.setVisibility(View.VISIBLE);
         }
+
         bookmarkViewModel = new ViewModelProvider(this).get(BookmarkViewModel.class);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         bookmarkAdapter = new BookmarkAdapter(requireContext());
@@ -195,7 +197,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
                 no_bookmark.setVisibility(View.GONE);
             }
         });
-
+//        initListener();
         searchBookmark();
 
         return mView;
@@ -203,7 +205,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
 
     //启动活动所要执行的操作
     public static void actionStart(Context context, int id, String name, Object search_result){
-        Intent intent = new Intent(context, HomeActivity.class);
+        Intent intent = new Intent(context,HomeActivity.class);
         ids.add(id);
         present += 1;
         now_id = id;
@@ -212,8 +214,7 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
         context.startActivity(intent);
     }
 
-    public void onBackPressed(){
-        //super.onBackPressed();
+    public void onBackPressed(Context context){
         ids.remove(present);
         folderName.remove(present);
         searchResult.remove(present);
@@ -227,6 +228,8 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
             searchResult.clear();
             ids.clear();
         }
+        Intent intent=new Intent(context,HomeActivity.class);
+        context.startActivity(intent);
 
     }
 
@@ -251,13 +254,14 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
         search_input = mView.findViewById(R.id.search_input);
         base_bottom = mView.findViewById(R.id.base_bottom);
         checked_bottom = mView.findViewById(R.id.checked_bottom);
-        
-        
-        
+
+
+
         Ll_new_folder = mView.findViewById(R.id.new_folder);
         Ll_edit = mView.findViewById(R.id.edit);
         Tv_checked_all = mView.findViewById(R.id.checked_all);
         Tv_checked_cancel = mView.findViewById(R.id.checked_cancel);
+        Ll_checked_close=mView.findViewById(R.id.checked_close);
         Ll_checked_delete = mView.findViewById(R.id.checked_delete);
         Ll_search = mView.findViewById(R.id.search);
         Iv_input_cleear = mView.findViewById(R.id.input_cleear);
@@ -268,13 +272,14 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
         Ll_edit.setOnClickListener(this);
         Tv_checked_all.setOnClickListener(this);
         Tv_checked_cancel.setOnClickListener(this);
+        Ll_checked_close.setOnClickListener(this);
         Ll_checked_delete.setOnClickListener(this);
         Ll_search.setOnClickListener(this);
         Iv_input_cleear.setOnClickListener(this);
         Iv_back_upper.setOnClickListener(this);
         Ll_checked_move.setOnClickListener(this);
     }
-    
+
 
     //初始化底部工具栏监听
     @Override
@@ -309,10 +314,10 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
                 search_input.setText("");
             }
         }else if(bottom_id == R.id.back_upper) {
-            onBackPressed();//返回上一级
+            onBackPressed(requireContext());//返回上一级
         }else if (bottom_id == R.id.checked_move){//转移至
             if (bookmarkAdapter.getCheckedItems().size() == 0) {
-                ToastUtil.shortToast(requireContext(),"未选中任何书签");
+                ToastUtil.shortToast(requireContext(),"未选中任何书d签");
             } else {
                 moveBookmark(requireContext());//弹出文件夹选择框并选择合适的文件夹
             }
@@ -690,6 +695,4 @@ public class RecordsBookmarkFragment extends Fragment implements View.OnClickLis
             }
         });
     }
-
-
 }
