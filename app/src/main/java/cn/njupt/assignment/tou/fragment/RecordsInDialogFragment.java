@@ -196,6 +196,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
                 }
             } else if (mViewPager2.getCurrentItem() == 1) {
                 if (mHistoryListener != null) {
+                    mHistoryListener.onHistoryButtonClick(view);
                 } else {
                     Log.e(TAG, "onClick: mBookmarkListener != null");
                 }

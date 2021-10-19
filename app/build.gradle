@@ -50,8 +50,18 @@ dependencies {
     // Glide图形转换工具
     implementation 'jp.wasabeef:glide-transformations:4.0.0'
 
+    //导入sectionedrecyclerview
     implementation 'com.truizlop.sectionedrecyclerview:library:1.2.0'
 
+    //导入jsoup
+    implementation 'org.jsoup:jsoup:1.14.3'
+
+    //导入OkHttp
+    implementation "com.squareup.okhttp3:okhttp:4.9.0"
+
+    // 导入okio
+    implementation 'com.squareup.okio:okio:2.10.0'
+    
     // tapLayout 美化
     implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
 
