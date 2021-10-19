@@ -1,13 +1,16 @@
 package cn.njupt.assignment.tou.fragment;
 
 import android.app.Dialog;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -36,6 +39,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
 
     private TabLayout mTabLayout;
     private ViewPager2 mViewPager2;
+    private ConstraintLayout mClRecords;
     private AppCompatButton mBtnCancel;
     private AppCompatButton mBtnSet;
 
@@ -98,12 +102,19 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         mViewPager2 = mView.findViewById(R.id.view_pager_2_records);
         mBtnCancel = mView.findViewById(R.id.btn_records_cancel);
         mBtnSet = mView.findViewById(R.id.btn_records_ultra_set);
+        mClRecords = mView.findViewById(R.id.records_header_container);
 
         mBtnCancel.setOnClickListener(this);
         mBtnSet.setOnClickListener(this);
 
         mFragmentList.add(new RecordsBookmarkFragment());
         mFragmentList.add(new RecordsHistoryFragment());
+
+        // initialize layout based on orientation
+        Configuration configuration = getResources().getConfiguration();
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            mClRecords.setVisibility(View.GONE);
+        }
 
         // TODO: 最后要禁止使用 viewPager2 滚动，以防与手势冲突
         mViewPager2.setUserInputEnabled(true);
@@ -173,6 +184,23 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         // delete ViewPager2 changeCallback
         mViewPager2.unregisterOnPageChangeCallback(changeCallback);
 
+    }
+
+    /**
+     * 监听旋转状态的改变
+     * @param newConfig:
+     * @return void
+     * @date 2021/10/15 19:09
+     * @author tou
+     */
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            mClRecords.setVisibility(View.GONE);
+        } else {
+            mClRecords.setVisibility(View.VISIBLE);
+        }
     }
 
     /**

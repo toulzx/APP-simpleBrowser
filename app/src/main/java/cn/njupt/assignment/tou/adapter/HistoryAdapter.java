@@ -25,7 +25,7 @@ import cn.njupt.assignment.tou.entity.HistoryRecord;
 /**
  * @author: sherman
  * @date: 2021/10/8
- * @description: 作为demo的adapter
+ * @description: 作为 history 的 adapter
  */
 public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         HistoryAdapter.HistoryHeaderViewHolder,
