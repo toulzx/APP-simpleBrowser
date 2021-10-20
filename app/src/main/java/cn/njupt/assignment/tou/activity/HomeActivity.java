@@ -326,7 +326,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 //                mWebView.loadUrl("file://///storage/emulated/0/Download/test.mht");
             }
         }
-        mWebView.loadUrl(getResources().getString(R.string.home_url));
 
         WebViewHelper.headWebView = WebViewHelper.currentWebView;
 
@@ -406,14 +405,14 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
                 String strInput = mSearch.getText().toString();
 
-                if (!isUrl(strInput)) {
+                if (!isUrl(UrlUtil.modifyPrefix(strInput))) {
 
                     try { mWebView.loadUrl(getSearchEngineUrl() + URLEncoder.encode(strInput,"utf-8")); }
                     catch (UnsupportedEncodingException e) { e.printStackTrace(); }
 
                 } else {
 
-                    mWebView.loadUrl(strInput);
+                    mWebView.loadUrl(UrlUtil.modifyPrefix(strInput));
 
                 }
 
