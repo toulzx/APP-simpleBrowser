@@ -571,7 +571,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 TextView url = view.findViewById(R.id.Search_list_history_url);
-                mSearch.dismissDropDown();
+                mSearch.clearFocus();
                 mWebView.loadUrl(url.getText().toString());
             }
         });
