@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
@@ -21,14 +22,16 @@ import java.util.List;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
+import cn.njupt.assignment.tou.activity.TestActivity;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
+
 
 /**
  * @author: sherman
- * @date: 2021/10/10
- * @description: 实时自动匹配适配器
+ * @date: 2021/10/22
+ * @description: 测试适配器
  */
-public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable {
+public class TestAdapter extends BaseAdapter implements Filterable {
 
     private List<HistoryRecord> data;
 
@@ -36,25 +39,25 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
 
     private Context context;
 
-    private TestAdapter.OnItemClickListener onItemClickListener;
+    private OnItemClickListener onItemClickListener;
 
     public interface OnItemClickListener{
         void onItemClick(View view , int position);
     }
-    public void setOnItemClickListener(TestAdapter.OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
-    public TestAdapter.OnItemClickListener getOnItemClickListener(){
+    public OnItemClickListener getOnItemClickListener(){
         return this.onItemClickListener;
     }
 
 
-    public AutoMatchingInTimeAdapter(Context context){
+    public TestAdapter(Context context){
         this.context = context;
     }
 
-    public AutoMatchingInTimeAdapter(@NonNull Context context, List<HistoryRecord> records) {
+    public TestAdapter(@NonNull Context context, List<HistoryRecord> records) {
         this.context = context;
         historyRecords = records;
     }
@@ -93,12 +96,12 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         HistoryRecord record = historyRecords.get(position);
-        TestAdapter.ViewHolder viewHolder;
+        ViewHolder viewHolder;
         View view;
 
         if (convertView == null){
             view = View.inflate(context,R.layout.auto_matching_list_unit,null);
-            viewHolder = new TestAdapter.ViewHolder();
+            viewHolder = new ViewHolder();
             viewHolder.image = view.findViewById(R.id.Search_list_history_image);
             viewHolder.name = view.findViewById(R.id.Search_list_history_name);
             viewHolder.url = view.findViewById(R.id.Search_list_history_url);
@@ -107,19 +110,19 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
             view.setTag(viewHolder);
         }else{
             view = convertView;
-            viewHolder = (TestAdapter.ViewHolder) view.getTag();
+            viewHolder = (ViewHolder) view.getTag();
         }
 
         Glide.with(viewHolder.image.getContext()).load(record.getHicon()).into(viewHolder.image);
         viewHolder.name.setText(record.getHname());
         viewHolder.url.setText(record.getHurl());
         viewHolder.id.setText(String.valueOf(record.getId()));
-//        viewHolder.layout.setOnClickListener(v -> {
-//            TextView url = view.findViewById(R.id.Search_list_history_url);
-//            Intent intent = new Intent(AutoMatchingInTimeAdapter.this.context, HomeActivity.class);
-//            intent.putExtra("history_url",url.getText().toString());
-//            AutoMatchingInTimeAdapter.this.context.startActivity(intent);
-//        });
+        viewHolder.layout.setOnClickListener(v -> {
+            TextView url = view.findViewById(R.id.Search_list_history_url);
+            Intent intent = new Intent(TestAdapter.this.context, HomeActivity.class);
+            intent.putExtra("history_url",url.getText().toString());
+            TestAdapter.this.context.startActivity(intent);
+        });
 
         return view;
     }
