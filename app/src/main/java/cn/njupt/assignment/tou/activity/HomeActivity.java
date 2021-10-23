@@ -17,27 +17,35 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
+import cn.njupt.assignment.tou.adapter.AutoMatchingInTimeAdapter;
 import cn.njupt.assignment.tou.base.sWebView;
 import cn.njupt.assignment.tou.callback.ToDialogRecordsCallbackListener;
 import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
@@ -61,7 +69,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private final static String TAG = HomeActivity.class.getSimpleName();
 
     private sWebView mWebView;
-    private EditText mSearch;
+    private AutoCompleteTextView mSearch;
     private ProgressBar mProgressBar;
     private ImageView mResize, mReload, mBack, mForward, mOptions, mRecords, mPages;
 
@@ -76,6 +84,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private Context mContext;
     private FragmentManager mFragmentManager;
     private InputMethodManager inputMethodManager;
+    private AutoMatchingInTimeAdapter autoMatchingInTimeAdapter;
 
     private long exitTime = 0;
     private static final int PRESS_BACK_EXIT_GAP = 2000;
@@ -102,6 +111,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         historyRecordViewModel = new ViewModelProvider(this).get(HistoryRecordViewModel.class);
         mBookmarkViewModel = new ViewModelProvider(this).get(BookmarkViewModel.class);
+        autoMatchingInTimeAdapter = new AutoMatchingInTimeAdapter(this);
         setContentView(R.layout.activity_home);
 
         mContext = this;
@@ -213,6 +223,38 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mOptions.setOnClickListener(this);
         mRecords.setOnClickListener(this);
         mPages.setOnClickListener(this);
+
+        mSearch.setAdapter(autoMatchingInTimeAdapter);
+        mSearch.setThreshold(2);
+
+        mSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                System.out.println("--------------" + s.toString());
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                System.out.println("+++++++++++++++++++++++++++++++++:" + s.toString());
+                if (s.toString().equals("") || s.toString() == null) {
+                    autoMatchingInTimeAdapter.clearHistoryRecords();
+                } else {
+                    historyRecordViewModel.getFuzzySearchInfo(s.toString()).observe(HomeActivity.this, historyRecords -> {
+                        Collections.sort(historyRecords);
+                        autoMatchingInTimeAdapter.setHistoryRecords(historyRecords);
+                    });
+                }
+                //刷新视图
+                autoMatchingInTimeAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
 
         setListener();
 
@@ -389,14 +431,14 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
                 String strInput = mSearch.getText().toString();
 
-                if (!isUrl(strInput)) {
+                if (!isUrl(UrlUtil.modifyPrefix(strInput))) {
 
                     try { mWebView.loadUrl(getSearchEngineUrl() + URLEncoder.encode(strInput,"utf-8")); }
                     catch (UnsupportedEncodingException e) { e.printStackTrace(); }
 
                 } else {
 
-                    mWebView.loadUrl(strInput);
+                    mWebView.loadUrl(UrlUtil.modifyPrefix(strInput));
 
                 }
 
@@ -509,6 +551,14 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        mSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView url = view.findViewById(R.id.Search_list_history_url);
+                mSearch.clearFocus();
+                mWebView.loadUrl(url.getText().toString());
+            }
+        });
         /* 回调函数 */
 
          // 网页内调用软键盘时
