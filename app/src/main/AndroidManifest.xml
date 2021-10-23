@@ -23,12 +23,12 @@
         <activity
             android:name=".activity.AutoMatchingActivity"
             android:windowSoftInputMode="adjustUnspecified"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".activity.HomeActivity"
             android:exported="true"
             android:screenOrientation="unspecified"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize|layoutDirection"
             android:windowSoftInputMode="adjustUnspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

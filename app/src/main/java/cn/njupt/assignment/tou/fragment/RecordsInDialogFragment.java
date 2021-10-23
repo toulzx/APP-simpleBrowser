@@ -3,16 +3,14 @@ package cn.njupt.assignment.tou.fragment;
 import android.app.Dialog;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -21,18 +19,25 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.callback.RecordsBookmarkCallbackListener;
-import cn.njupt.assignment.tou.callback.RecordsHistoryCallBackListener;
+import cn.njupt.assignment.tou.activity.HomeActivity;
+import cn.njupt.assignment.tou.adapter.RecordsViewPager2Adapter;
+import cn.njupt.assignment.tou.callback.ToBookmarkCallbackListener;
+import cn.njupt.assignment.tou.callback.ToHistoryCallbackListener;
+import cn.njupt.assignment.tou.callback.ToDialogRecordsCallbackListener;
+import cn.njupt.assignment.tou.utils.OptionSPHelper;
 
 public class RecordsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
     private static final String TAG = RecordsInDialogFragment.class.getSimpleName();
 
     private View mView;
+
+    private static boolean mIsBookmarkEditMode = false;
+    private static boolean mIsBookmarkInHomePage = true;
+    private static String mStrBookmarkUpperFolderName = "";
 
     private BottomSheetDialog mBottomSheetDialog;
     private BottomSheetBehavior<View> mBottomSheetBehavior;
@@ -42,35 +47,28 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
     private ConstraintLayout mClRecords;
     private AppCompatButton mBtnCancel;
     private AppCompatButton mBtnSet;
+    private TextView mTvBookmarkUpperFolderName;
+
+    // Bookmark 编辑状态时的顶部工具栏
+    private LinearLayout checked_top;
+    private TextView checked_all;
+    private TextView checked_num;
+    private TextView checked_cancel;
 
     private TabLayoutMediator mTabLayoutMediator;
+    private RecordsViewPager2Adapter mViewPager2Adapter;
 
-    private static final String[] TAB_NAMES = new String[]{"bookmark", "history"};
-    private final List<Fragment> mFragmentList = new ArrayList<>();
+    private static final String[] TAB_NAMES = new String[]{"history", "bookmark" };
 
-    private final ViewPager2.OnPageChangeCallback changeCallback = new ViewPager2.OnPageChangeCallback() {
-        @Override
-        public void onPageSelected(int position) {
-            super.onPageSelected(position);
-            // 修改公用按钮
-            if (position == 0) {
-                mBtnSet.setText("看情况呢");
-            } else if (position == 1) {
-                mBtnSet.setText("编辑");
-            }
-        }
-    };
-
-    // TODO: 也许可以写到 1 个 Callback 中...
-    // 但我遇到了问题，要怎么分辨唤起哪边的 Callback 呢
-    public static RecordsHistoryCallBackListener mHistoryListener;
-    public static RecordsBookmarkCallbackListener mBookmarkListener;
-
-    public static void setHistoryCallBackListener(RecordsHistoryCallBackListener listener) {
-        mHistoryListener = listener;
+    // callback
+    private ViewPager2.OnPageChangeCallback changeCallback;
+    public static ToBookmarkCallbackListener mToBookmarkCallbackListener;
+    public static ToHistoryCallbackListener mToHistoryCallbackListener ;
+    public static void setToBookmarkCallbackListener(ToBookmarkCallbackListener listener) {
+        mToBookmarkCallbackListener = listener;
     }
-    public static void setBookmarkCallBackListener(RecordsBookmarkCallbackListener listener) {
-        mBookmarkListener = listener;
+    public static void setToHistoryCallbackListener (ToHistoryCallbackListener listener) {
+        mToHistoryCallbackListener = listener;
     }
 
 
@@ -91,7 +89,6 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         // bind bottomSheetDialog
         mBottomSheetDialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
         mBottomSheetDialog.setContentView(mView);
-
         // get and set behavior
         mBottomSheetBehavior = BottomSheetBehavior.from((View) mView.getParent());
         mBottomSheetBehavior.setHideable(true);
@@ -102,13 +99,18 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         mViewPager2 = mView.findViewById(R.id.view_pager_2_records);
         mBtnCancel = mView.findViewById(R.id.btn_records_cancel);
         mBtnSet = mView.findViewById(R.id.btn_records_ultra_set);
+        mTvBookmarkUpperFolderName = mView.findViewById(R.id.bookmark_upper_folder_name);
         mClRecords = mView.findViewById(R.id.records_header_container);
+        checked_top = mView.findViewById(R.id.checked_top);
+        checked_num = mView.findViewById(R.id.checked_num);
+        checked_all = mView.findViewById(R.id.checked_all);
+        checked_cancel = mView.findViewById(R.id.checked_cancel);
+
 
         mBtnCancel.setOnClickListener(this);
         mBtnSet.setOnClickListener(this);
-
-        mFragmentList.add(new RecordsBookmarkFragment());
-        mFragmentList.add(new RecordsHistoryFragment());
+        checked_all.setOnClickListener(this);
+        checked_cancel.setOnClickListener(this);
 
         // initialize layout based on orientation
         Configuration configuration = getResources().getConfiguration();
@@ -116,23 +118,26 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
 //            mClRecords.setVisibility(View.GONE);
         }
 
-        // TODO: 最后要禁止使用 viewPager2 滚动，以防与手势冲突
+        // bind Adapter
+        mViewPager2Adapter = new RecordsViewPager2Adapter(this);
+        mViewPager2.setAdapter(mViewPager2Adapter);
+
+        // 允许 viewPager2 横向滚动
         mViewPager2.setUserInputEnabled(true);
+
         mViewPager2.setNestedScrollingEnabled(false);
 
-        // bind Adapter
-        mViewPager2.setAdapter(new FragmentStateAdapter(this) {
-            @NonNull
-            @Override
-            public Fragment createFragment(int position) {
-                return mFragmentList.get(position);
-            }
+        if (Objects.equals(OptionSPHelper.getTargetBookmarkPageValue(), "true")) {
+            mBtnSet.setText("更多");
+            mIsBookmarkEditMode = false;
+            mViewPager2.setCurrentItem(RecordsViewPager2Adapter.BOOKMARK_PAGE_INDEX);
+            mBtnCancel.setText(mIsBookmarkInHomePage ? "关闭" : "返回");
+            mTvBookmarkUpperFolderName.setText(mIsBookmarkInHomePage ? "" : "上一级：" + mStrBookmarkUpperFolderName);
+        } else {
+            mBtnSet.setText("清除");
+            mViewPager2.setCurrentItem(RecordsViewPager2Adapter.HISTORY_PAGE_INDEX);
+        }
 
-            @Override
-            public int getItemCount() {
-                return mFragmentList.size();
-            }
-        });
 
         //bind TabLayout with ViewPager
         mTabLayoutMediator = new TabLayoutMediator(mTabLayout, mViewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
@@ -145,7 +150,103 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         mTabLayoutMediator.attach();
 
         // set ViewPager2 changeCallback
+        changeCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                // 记录 viewPager2 最后使用的页面
+                if (position == RecordsViewPager2Adapter.BOOKMARK_PAGE_INDEX) {
+                    if (mIsBookmarkEditMode) {
+                        mBtnSet.setText("删除");
+                        mBtnCancel.setText("移动至");
+                    } else {
+                        mBtnSet.setText("更多");
+                        /* TODO: 这里可以体会到 viewPager2 中的销毁机制
+                         * 当你以 HistoryFragment 退出时，textView 的内容被销毁，当你以 BookmarkFragment 退出时，textView 内容被保留
+                         * 在这里两个过程中，static 的 str 内容始终没有被销毁
+                         * 注释下面这句你就能体会到了*/
+                        mTvBookmarkUpperFolderName.setText("上一级：" + mStrBookmarkUpperFolderName);
+                        if (mIsBookmarkInHomePage) {
+                            mBtnCancel.setText("关闭");
+                            mTvBookmarkUpperFolderName.setVisibility(View.GONE);
+                        } else {
+                            mBtnCancel.setText("返回");
+                            mTvBookmarkUpperFolderName.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    OptionSPHelper.setValue(null,null,null,null, "true");
+                } else if (position == RecordsViewPager2Adapter.HISTORY_PAGE_INDEX) {
+                    mBtnSet.setText("清除");
+                    mBtnCancel.setText("关闭");
+                    mTvBookmarkUpperFolderName.setVisibility(View.GONE);
+                    OptionSPHelper.setValue(null,null,null,null, "false");
+                }
+            }
+        };
         mViewPager2.registerOnPageChangeCallback(changeCallback);
+
+        // callback listener
+        RecordsBookmarkFragment.setToDialogRecordsCallbackListener(new ToDialogRecordsCallbackListener() {
+            @Override
+            public void refreshFragment(int currentFolderIndex, String upperFolderName) {
+                mViewPager2Adapter.update();
+                if (currentFolderIndex > 0) {
+                    mIsBookmarkInHomePage = false;
+                    mBtnCancel.setText("返回");
+                    mStrBookmarkUpperFolderName = upperFolderName;
+                    mTvBookmarkUpperFolderName.setText("上一级：" + upperFolderName);
+                } else {
+                    mIsBookmarkInHomePage = true;
+                    mBtnCancel.setText("关闭");
+                    mStrBookmarkUpperFolderName = "";
+                    mTvBookmarkUpperFolderName.setText("");
+                }
+            }
+            @Override
+            public void resetBtnsText(boolean isEditMode) {
+                mIsBookmarkEditMode = isEditMode;
+                if (isEditMode) {
+                    mBtnSet.setText("删除");
+                    mBtnCancel.setText("移动至");
+                    mViewPager2.setUserInputEnabled(false);
+                    mTabLayout.setVisibility(View.GONE);
+                    checked_top.setVisibility(View.VISIBLE);
+                    checked_all.setText("全选");
+                    checked_num.setText("已选择0项");
+                } else {
+                    mBtnSet.setText("更多");
+                    mBtnCancel.setText(mIsBookmarkInHomePage ? "关闭" : "返回");
+                    mViewPager2.setUserInputEnabled(true);
+                    checked_top.setVisibility(View.GONE);
+                    mTabLayout.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public TextView getCheckedNumTv() {
+                return checked_num;
+            }
+
+            @Override
+            public void hideDialog() {}
+        });
+        HomeActivity.setToDialogRecordsCallbackListener(new ToDialogRecordsCallbackListener() {
+            @Override
+            public void refreshFragment(int currentFolderIndex, String upperFolderName) {}
+            @Override
+            public void resetBtnsText(boolean isEditMode) {}
+            @Override
+            public TextView getCheckedNumTv() {
+                return null;
+            }
+
+            @Override
+            public void hideDialog() {
+                //设置合起状态
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+        });
 
         return mBottomSheetDialog;
     }
@@ -188,6 +289,11 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
 
     /**
      * 监听旋转状态的改变
+     *
+     * 注意：必须在对应 activity 中设置
+     * android:configChanges="orientation|screenSize|layoutDirection"
+     * 才会生效（缺一不可）
+     *
      * @param newConfig:
      * @return void
      * @date 2021/10/15 19:09
@@ -197,7 +303,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            mClRecords.setVisibility(View.GONE);
+            mClRecords.setVisibility(View.GONE);
         } else {
             mClRecords.setVisibility(View.VISIBLE);
         }
@@ -211,24 +317,37 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
     public void onClick(View view) {
         if (view.getId() == R.id.btn_records_cancel) {
 
-            //设置合起状态
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            if (mIsBookmarkEditMode) {
+                mToBookmarkCallbackListener.onMoveButtonClick();
+            } else {
+                if (mIsBookmarkInHomePage){
+                    //设置合起状态
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                } else {
+                    mToBookmarkCallbackListener.onBackButtonClick();
+                }
+            }
+
 
         } else if (view.getId() == R.id.btn_records_ultra_set) {
 
-            if (mViewPager2.getCurrentItem() == 0) {
-                if (mBookmarkListener != null) {
-                    mBookmarkListener.onBookmarkButtonClick(view);
-                } else {
-                    Log.e(TAG, "onClick: mBookmarkListener != null");
+            if (mViewPager2.getCurrentItem() == RecordsViewPager2Adapter.BOOKMARK_PAGE_INDEX) {
+                if (mToBookmarkCallbackListener != null) {
+                    mToBookmarkCallbackListener.onMenuButtonClick(view);
                 }
-            } else if (mViewPager2.getCurrentItem() == 1) {
-                if (mHistoryListener != null) {
-                    mHistoryListener.onHistoryButtonClick(view);
-                } else {
-                    Log.e(TAG, "onClick: mBookmarkListener != null");
+            } else if (mViewPager2.getCurrentItem() == RecordsViewPager2Adapter.HISTORY_PAGE_INDEX) {
+                if (mToHistoryCallbackListener != null) {
+                    mToHistoryCallbackListener.onHistoryButtonClick(view);
                 }
             }
+
+        } else if (view.getId() == R.id.checked_all) {
+
+            mToBookmarkCallbackListener.onCheckAllButtonClick(checked_all,checked_num);
+
+        } else if (view.getId() == R.id.checked_cancel) {
+
+            mToBookmarkCallbackListener.onCancelEditModeButtonClick();
 
         }
     }

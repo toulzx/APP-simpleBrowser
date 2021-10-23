@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,9 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.activity.HomeActivity;
 import cn.njupt.assignment.tou.adapter.HistoryAdapter;
-import cn.njupt.assignment.tou.callback.RecordsHistoryCallBackListener;
+import cn.njupt.assignment.tou.callback.ToBookmarkCallbackListener;
+import cn.njupt.assignment.tou.callback.ToHistoryCallbackListener;
+import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
 import cn.njupt.assignment.tou.entity.HistoryList;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
 import cn.njupt.assignment.tou.utils.ToastUtil;
@@ -44,6 +44,11 @@ public class RecordsHistoryFragment extends Fragment {
     private RecyclerView recyclerView;
     private HistoryRecordViewModel historyRecordViewModel;
     private HistoryAdapter historyAdapter;
+
+    public static ToHomeActivityCallbackListener mToHomeActivityCallbackListener;
+    public static void setToHomeActivityCallbackListener(ToHomeActivityCallbackListener listener) {
+        mToHomeActivityCallbackListener = listener;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,7 +74,6 @@ public class RecordsHistoryFragment extends Fragment {
         Log.i(TAG, "onCreateView: requireContext() = "+requireContext());
 
         //添加适配器
-        Log.i(TAG, sortForList(historyRecordViewModel.getAll()).get(0).getTime());
         historyAdapter = new HistoryAdapter(getContext(),sortForList(historyRecordViewModel.getAll()));
         recyclerView.setAdapter(historyAdapter);
 
@@ -92,10 +96,9 @@ public class RecordsHistoryFragment extends Fragment {
         onClickShow();
 
         // 回调函数，当点击 ParentFragment 中的 Button 时，触发清除历史记录操作
-        RecordsInDialogFragment.setHistoryCallBackListener(new RecordsHistoryCallBackListener() {
+        RecordsInDialogFragment.setToHistoryCallbackListener(new ToHistoryCallbackListener() {
             @Override
             public void onHistoryButtonClick(View view) {
-                Log.i(TAG, "onButtonClick: 我不好我不好我不好");
                 // View当前PopupMenu显示的相对View的位置
                 PopupMenu popupMenu = new PopupMenu(getContext(), view);
                 // menu布局
@@ -118,7 +121,6 @@ public class RecordsHistoryFragment extends Fragment {
                     }
                     return false;
                 });
-
                 // PopupMenu关闭事件
                 popupMenu.setOnDismissListener(menu -> {
                     //关闭后的逻辑
@@ -178,9 +180,7 @@ public class RecordsHistoryFragment extends Fragment {
     private void onClickShow(){
         historyAdapter.setOnItemClickListener((view, section, position) -> {
             TextView url = view.findViewById(R.id.list_history_url);
-            Intent intent = new Intent(getContext(), HomeActivity.class);
-            intent.putExtra("history_url",url.getText().toString());
-            startActivity(intent);
+            mToHomeActivityCallbackListener.loadUrl(url.getText().toString());
         });
     }
 

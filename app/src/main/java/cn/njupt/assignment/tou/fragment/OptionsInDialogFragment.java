@@ -24,12 +24,9 @@ import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
-import cn.njupt.assignment.tou.callback.BookmarkAddCallbackListener;
-import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
-import cn.njupt.assignment.tou.entity.Bookmark;
+import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
 import cn.njupt.assignment.tou.utils.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
-import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
 
 public class OptionsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener, SwitchCompat.OnCheckedChangeListener {
 
@@ -43,16 +40,11 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
     private ImageButton mBtnCancel;
     private ConstraintLayout mClOptionsBookmarkAdd;
     private Switch mStOrientation, mStGraphless, mStPrivate;
-    private ConstraintLayout mClOptions;
+    private ConstraintLayout mClOptionsHeader;
 
-    public static OptionsGraphlessModeCallbackListener mGraphlessModeCallbackListener;
-    public static BookmarkAddCallbackListener mBookmarkAddCallbackListener;
-
-    public static void SetGraphlessModeCallbackListener(OptionsGraphlessModeCallbackListener listener) {
-        mGraphlessModeCallbackListener = listener;
-    }
-    public static void SetBookmarkAddCallbackListener(BookmarkAddCallbackListener listener) {
-        mBookmarkAddCallbackListener = listener;
+    public static ToHomeActivityCallbackListener mFromDialogOptionsCallbackListener;
+    public static void SetToHomeActivityCallbackListener(ToHomeActivityCallbackListener listener) {
+        mFromDialogOptionsCallbackListener = listener;
     }
 
 
@@ -84,7 +76,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
         mStOrientation = mView.findViewById(R.id.switch_orientation_lock);
         mStGraphless = mView.findViewById(R.id.switch_graphless_mode);
         mStPrivate = mView.findViewById(R.id.switch_private_mode);
-        mClOptions = mView.findViewById(R.id.options_header_container);
+        mClOptionsHeader = mView.findViewById(R.id.options_header_container);
         mClOptionsBookmarkAdd = mView.findViewById(R.id.option_bookmark_add);
 
         // set status
@@ -101,7 +93,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
         // initialize layout based on orientation
         Configuration configuration = getResources().getConfiguration();
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            mClOptions.setVisibility(View.GONE);
+            mClOptionsHeader.setVisibility(View.GONE);
         }
 
         // set listener
@@ -145,7 +137,9 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
         } else if (view.getId() == R.id.option_bookmark_add) {
 
-            mBookmarkAddCallbackListener.addBookmark();
+            mFromDialogOptionsCallbackListener.addBookmark();
+            //设置合起状态
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         }
 
@@ -162,9 +156,9 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            mClOptions.setVisibility(View.GONE);
+            mClOptionsHeader.setVisibility(View.GONE);
         } else {
-            mClOptions.setVisibility(View.VISIBLE);
+            mClOptionsHeader.setVisibility(View.VISIBLE);
         }
     }
 
@@ -187,33 +181,33 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
                 // 如果当前是横屏，锁定横屏
                 if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    OptionSPHelper.setValue(null,"horizontal", null, null);
+                    OptionSPHelper.setValue(null,"horizontal", null, null, null);
                     ToastUtil.shortToast(requireContext(), "锁定横屏啦");
                 }
                 // 如果当前是竖屏，锁定竖屏
                 if(configuration.orientation==Configuration.ORIENTATION_PORTRAIT){
                     requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    OptionSPHelper.setValue(null, "vertical", null, null);
+                    OptionSPHelper.setValue(null, "vertical", null, null, null);
                     ToastUtil.shortToast(requireContext(), "锁定竖屏啦");
                 }
 
             } else {
                 // 如果关闭开关，则取消锁定
                 requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                OptionSPHelper.setValue(null, "auto", null, null);
+                OptionSPHelper.setValue(null, "auto", null, null, null);
             }
 
         } else if (buttonView.getId() == R.id.switch_graphless_mode) {
 
-            if (mGraphlessModeCallbackListener != null) {
+            if (mFromDialogOptionsCallbackListener != null) {
 
                 if (isChecked) {
-                    mGraphlessModeCallbackListener.setGraphlessMode(HomeActivity.PROHIBIT_IMAGE_LOADED);
+                    mFromDialogOptionsCallbackListener.setGraphlessMode(HomeActivity.PROHIBIT_IMAGE_LOADED);
                 } else {
-                    mGraphlessModeCallbackListener.setGraphlessMode(HomeActivity.ALLOW_IMAGE_LOADED);
+                    mFromDialogOptionsCallbackListener.setGraphlessMode(HomeActivity.ALLOW_IMAGE_LOADED);
                 }
 
-                OptionSPHelper.setValue(null, null, null, String.valueOf(isChecked));
+                OptionSPHelper.setValue(null, null, null, String.valueOf(isChecked), null);
 
             } else {
 
@@ -223,7 +217,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
 
         } else if (buttonView.getId() == R.id.switch_private_mode) {
 
-            OptionSPHelper.setValue(null, null, String.valueOf(isChecked), null);
+            OptionSPHelper.setValue(null, null, String.valueOf(isChecked), null, null);
 
         }
     }

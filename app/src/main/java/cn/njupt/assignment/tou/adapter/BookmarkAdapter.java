@@ -93,7 +93,6 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.ViewHo
         binding.setBookmark(bookmarkBean);
         binding.setItemclick(itemClick);
 //        holder.itemView.setTag(position);//设置Tag
-        // TODO 复选框显示会使程序闪退！！！
        showCheckBox(binding, position, bookmarkBean);//显示复选框以进行编辑操作
         binding.executePendingBindings();
     }

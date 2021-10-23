@@ -28,6 +28,7 @@ public class OptionSPHelper {
     public static final String KEY_LOCK_ORIENTATION = "lockOrientation";
     public static final String KEY_PRIVATE_MODE = "privateMode";
     public static final String KEY_GRAPHLESS_MODE = "graphlessMode";
+    public static final String KEY_TARGET_BOOKMARK_PAGE = "true";
 
     private static final String VALUE_FIRST_TIME_USED = "true";
     private static final String VALUE_NOT_FIRST_TIME_USED = "false";
@@ -35,6 +36,7 @@ public class OptionSPHelper {
     public static final String VALUE_DEFAULT_LOCK_ORIENTATION = "vertical";     // vertical horizontal auto
     public static final String VALUE_DEFAULT_PRIVATE_MODE = "false";
     public static final String VALUE_DEFAULT_GRAPHLESS_MODE = "false";
+    public static final String VALUE_DEFAULT_TARGET_BOOKMARK_PAGE = "false";
 
     public static final String VALUE_WRONG = "WRONG";
 
@@ -66,6 +68,7 @@ public class OptionSPHelper {
             editor.putString(KEY_LOCK_ORIENTATION, VALUE_DEFAULT_LOCK_ORIENTATION);
             editor.putString(KEY_PRIVATE_MODE, VALUE_DEFAULT_PRIVATE_MODE);
             editor.putString(KEY_GRAPHLESS_MODE, VALUE_DEFAULT_GRAPHLESS_MODE);
+            editor.putString(KEY_TARGET_BOOKMARK_PAGE, VALUE_DEFAULT_TARGET_BOOKMARK_PAGE);
 
             editor.apply();
 
@@ -84,7 +87,9 @@ public class OptionSPHelper {
      * @date 2021/10/14 17:15
      * @author tou
      */
-    public static void setValue(String forceFullScreen, String orientation, String privateMode, String graphlessMode) {
+    public static void setValue(String forceFullScreen, String orientation,
+                                String privateMode, String graphlessMode,
+                                String targetBookmarkPage) {
 
         if (mApp == null) {
             Log.e(TAG, "在使用本类方法之前，请先调用初始化函数 init() ！！！");
@@ -97,6 +102,7 @@ public class OptionSPHelper {
         if (orientation != null) { editor.putString(KEY_LOCK_ORIENTATION, orientation); }
         if (privateMode != null) { editor.putString(KEY_PRIVATE_MODE, privateMode); }
         if (graphlessMode != null) { editor.putString(KEY_GRAPHLESS_MODE, graphlessMode); }
+        if (targetBookmarkPage != null) { editor.putString(KEY_TARGET_BOOKMARK_PAGE, targetBookmarkPage); }
 
         editor.apply();
 
@@ -122,6 +128,7 @@ public class OptionSPHelper {
         map.put(KEY_LOCK_ORIENTATION, getLockOrientationValue());
         map.put(KEY_PRIVATE_MODE, getPrivateModeValue());
         map.put(KEY_GRAPHLESS_MODE, getGraphlessModeValue());
+        map.put(KEY_TARGET_BOOKMARK_PAGE, getTargetBookmarkPageValue());
 
         return map;
 
@@ -189,6 +196,22 @@ public class OptionSPHelper {
         }
 
         return mSharedPreferences.getString(KEY_GRAPHLESS_MODE, VALUE_WRONG);
+
+    }
+
+    /**
+     * 打开 records 的默认页面是否是书签页：true,false
+     * @return java.lang.String
+     * @author tou
+     */
+    public static String getTargetBookmarkPageValue() {
+
+        if (mApp == null) {
+            Log.e(TAG, "getTargetBookmarkPageValue(): 在使用本类方法之前，请先调用初始化函数 init() ！！！");
+            return null;
+        }
+
+        return mSharedPreferences.getString(KEY_TARGET_BOOKMARK_PAGE, VALUE_WRONG);
 
     }
 

@@ -16,7 +16,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -33,29 +32,22 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.base.sWebView;
-import cn.njupt.assignment.tou.callback.BookmarkAddCallbackListener;
-import cn.njupt.assignment.tou.callback.InputStatusCallbackListener;
-import cn.njupt.assignment.tou.dao.BookmarkDao;
+import cn.njupt.assignment.tou.callback.ToDialogRecordsCallbackListener;
+import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
 import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
-import cn.njupt.assignment.tou.callback.OptionsGraphlessModeCallbackListener;
 import cn.njupt.assignment.tou.fragment.OptionsInDialogFragment;
+import cn.njupt.assignment.tou.fragment.RecordsBookmarkFragment;
+import cn.njupt.assignment.tou.fragment.RecordsHistoryFragment;
 import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
-import cn.njupt.assignment.tou.repository.BookmarkRepository;
 import cn.njupt.assignment.tou.utils.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.UrlUtil;
@@ -78,10 +70,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private BarFooterFragment mFooter;
     private BarHeaderFragment mHeader;
 
-    private Intent intentOfHistory;
     private HistoryRecordViewModel historyRecordViewModel;
-    private BookmarkRepository bookmarkRepository;
-
     private BookmarkViewModel mBookmarkViewModel;
 
     private Context mContext;
@@ -101,7 +90,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     public static final int ALLOW_IMAGE_LOADED = 1;
     public static final int PROHIBIT_IMAGE_LOADED = 0;
 
-    private BottomSheetDialog bottomSheetDialog;
+    public static ToDialogRecordsCallbackListener mToDialogRecordsCallbackListener;
+    public static void setToDialogRecordsCallbackListener(ToDialogRecordsCallbackListener listener) {
+        mToDialogRecordsCallbackListener = listener;
+    }
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -161,7 +153,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         Log.i(TAG, "onBackPressed: pressed");
         if (Objects.equals(OptionSPHelper.getForceFullScreenValue(), String.valueOf(true))) {
             // 关闭强制全屏选项
-            OptionSPHelper.setValue(String.valueOf(false), null, null, null);
+            OptionSPHelper.setValue(String.valueOf(false), null, null, null, null);
             // 重现 bar 栏
             setBarStatus(false);
             Log.i(TAG, "onBackPressed: 全屏");
@@ -302,32 +294,23 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mWebSettings.setBlockNetworkImage(false);
 
         // HTTP与HTTPS混合加载模式（注：application 中需启用 android:usesCleartextTraffic="true"）
-        // 资源混合模式
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            mWebSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-//        }
         mWebSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        intentOfHistory =getIntent();
-        String historyUrl = intentOfHistory.getStringExtra("history_url");
+        // 加载主页
         if (WebViewHelper.currentWebView!=null){
+            // 多窗口原有记录
             if (WebViewHelper.currentBundle!=null){
                 mWebView.restoreState(WebViewHelper.currentBundle);
                 mSearch.setText(WebViewHelper.currentWebView.getUrl());
             }else{
                 mWebView.loadUrl(WebViewHelper.currentWebView.getUrl());
             }
-        }else{
-            if (historyUrl!=null){
-                mWebView.loadUrl(historyUrl);
-            }else{
-                // 加载首页
-                mWebView.loadUrl(getResources().getString(R.string.home_url));
-//                mWebView.loadUrl("file://///storage/emulated/0/Download/test.mht");
-            }
+        } else {
+            // 首次加载
+            mWebView.loadUrl(getResources().getString(R.string.home_url));
         }
-        mWebView.loadUrl(getResources().getString(R.string.home_url));
 
+        // 多窗口模式 helper
         WebViewHelper.headWebView = WebViewHelper.currentWebView;
 
     }
@@ -391,7 +374,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             // 设置强制全屏
-            OptionSPHelper.setValue(String.valueOf(true), null, null, null);
+            OptionSPHelper.setValue(String.valueOf(true), null, null, null, null);
 
             // 回调 HomeActivity 使 Bar 栏消失
             setBarStatus(true);
@@ -528,28 +511,69 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         /* 回调函数 */
 
-        // 无图模式
-        OptionsInDialogFragment.SetGraphlessModeCallbackListener(new OptionsGraphlessModeCallbackListener() {
-            @Override
-            public void setGraphlessMode(int flag) {
-                setImageBlock(flag);
-            }
-        });
-
          // 网页内调用软键盘时
-        BarFooterFragment.SetInputStatusCallbackListener(new InputStatusCallbackListener() {
+        BarFooterFragment.SetToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
             @Override
-            public void fullScreen(boolean isToHide) {
+            public void loadUrl(String url) {}
+            @Override
+            public void setGraphlessMode(int flag) {}
+            @Override
+            public void addBookmark() {}
+
+            @Override
+            public void fullScreenWhenInput(boolean isToHide) {
                 if (!mSearch.hasFocus()) {
                     setBarStatus(isToHide);
                 }
             }
         });
 
-        OptionsInDialogFragment.SetBookmarkAddCallbackListener(new BookmarkAddCallbackListener() {
+        // 书签访问跳转
+        RecordsBookmarkFragment.setToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
+            @Override
+            public void loadUrl(String url) {
+                mWebView.loadUrl(url);
+                mToDialogRecordsCallbackListener.hideDialog();
+            }
+            @Override
+            public void setGraphlessMode(int flag) {}
+            @Override
+            public void addBookmark() {}
+            @Override
+            public void fullScreenWhenInput(boolean isToHide) {}
+        });
+
+        // 历史记录访问跳转
+        RecordsHistoryFragment.setToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
+            @Override
+            public void loadUrl(String url) {
+                mWebView.loadUrl(url);
+                mToDialogRecordsCallbackListener.hideDialog();
+            }
+            @Override
+            public void setGraphlessMode(int flag) {}
+            @Override
+            public void addBookmark() {}
+            @Override
+            public void fullScreenWhenInput(boolean isToHide) {}
+        });
+
+        // 无图模式、添加书签
+        OptionsInDialogFragment.SetToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
+            @Override
+            public void loadUrl(String url) {}
+            @Override
+            public void fullScreenWhenInput(boolean isToHide) {}
+
+            @Override
+            public void setGraphlessMode(int flag) {
+                setImageBlock(flag);
+            }
+
             @Override
             public void addBookmark() {
                 mBookmarkViewModel.insertBookmark(new Bookmark(mWebView.getTitle(), mWebView.getUrl(), UrlUtil.getIconUrl(mWebView.getUrl()), 0, 0, -1, mBookmarkViewModel.getMaxSort(-1) + 1));
+                ToastUtil.shortToast(mContext, "书签保存成功");
             }
         });
 
@@ -679,8 +703,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 //                        }
 //                    }
 //                });
-                //记录浏览的历史记录
-                if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(false))) {
+                // 如果没打开无痕模式且不是主页，则记录浏览的历史记录
+                if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(false)) && !webView.getUrl().equals(getResources().getString(R.string.home_url))) {
                     historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
                 }
             }
@@ -807,7 +831,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 判断是否是网页链接
-     * TODO:已委托大宇 0915
      * TODO:进阶；判断是否是网址简写
      * @param strInput: 用户在搜索栏输入的内容
      * @return boolean

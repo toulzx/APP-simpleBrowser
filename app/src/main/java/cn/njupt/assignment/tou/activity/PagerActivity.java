@@ -1,7 +1,6 @@
 package cn.njupt.assignment.tou.activity;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.viewpager.widget.PagerAdapter;
 
@@ -21,7 +20,6 @@ import java.util.List;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.databinding.WindowPagerBinding;
-import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.WebViewHelper;
 
 /**

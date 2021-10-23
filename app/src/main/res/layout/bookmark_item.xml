@@ -53,19 +53,21 @@
             <LinearLayout
                 android:id="@+id/one_bookmark_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
-                android:orientation="vertical"
-                android:paddingLeft="20dp"
                 android:clickable="true"
-                android:onClick="@{(view)->itemclick.onClicked(view, bookmark)}">
+                android:gravity="center_vertical"
+                android:onClick="@{(view)->itemclick.onClicked(view, bookmark)}"
+                android:orientation="vertical"
+                android:paddingLeft="20dp">
 
                 <TextView
                     android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:ellipsize="end"
-                    android:maxEms="6"
+                    android:maxEms="10"
                     android:singleLine="true"
                     android:text="@{bookmark.bname}"
                     android:textColor="@color/black"
@@ -80,7 +82,8 @@
                     android:singleLine="true"
                     android:text="@{bookmark.isFolder == 0 ? bookmark.burl : String.valueOf(bookmark.bnum)+'个'+'书'+'签'}"
                     android:textColor="#606267"
-                    android:textSize="14dp" />
+                    android:textSize="14dp"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 

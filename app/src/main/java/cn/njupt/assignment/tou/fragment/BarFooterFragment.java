@@ -11,16 +11,15 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.callback.InputStatusCallbackListener;
+import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
 
 public class BarFooterFragment extends Fragment {
 
     private View mView;
 
-    public static InputStatusCallbackListener mInputStatusCallbackListener;
-
-    public static void SetInputStatusCallbackListener(InputStatusCallbackListener listener) {
-        mInputStatusCallbackListener = listener;
+    public static ToHomeActivityCallbackListener mToHomeActivityCallbackListener;
+    public static void SetToHomeActivityCallbackListener(ToHomeActivityCallbackListener listener) {
+        mToHomeActivityCallbackListener = listener;
     }
 
     @Nullable
@@ -35,7 +34,7 @@ public class BarFooterFragment extends Fragment {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if (bottom - oldBottom < 0) {
-                    mInputStatusCallbackListener.fullScreen(true);
+                    mToHomeActivityCallbackListener.fullScreenWhenInput(true);
                 }
             }
         });

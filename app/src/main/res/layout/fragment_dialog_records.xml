@@ -15,6 +15,56 @@
         android:layout_height="60dp"
         android:background="@drawable/bottom_sheet_bg">
 
+        <LinearLayout
+            android:id="@+id/checked_top"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="20dp"
+            android:background="@color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/checked_all"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="全选"
+                android:textColor="@color/safari_light_blue"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:clickable="true"/>
+
+            <TextView
+                android:id="@+id/checked_num"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:text="已选择0项"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/checked_cancel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="right"
+                android:text="取消"
+                android:textColor="@color/safari_light_blue"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:clickable="true"/>
+        </LinearLayout>
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout_records"
             android:layout_width="0dp"
@@ -25,7 +75,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tabTextColor="@color/white">
+            app:tabTextColor="@color/white"
+            android:visibility="visible">
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_item_bookmark"
@@ -86,12 +137,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:text="看情况显示"
+            android:text="更多"
             android:textColor="@color/safari_light_blue"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/bookmark_upper_folder_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/safari_background_deep_grey"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_records_cancel"
+            app:layout_constraintStart_toEndOf="@+id/btn_records_ultra_set"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
