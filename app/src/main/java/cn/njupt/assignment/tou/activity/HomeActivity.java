@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -38,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -571,6 +573,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void addBookmark() {}
 
             @Override
+            public void saveWebPage() {
+
+            }
+
+            @Override
             public void fullScreenWhenInput(boolean isToHide) {
                 if (!mSearch.hasFocus()) {
                     setBarStatus(isToHide);
@@ -589,6 +596,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void setGraphlessMode(int flag) {}
             @Override
             public void addBookmark() {}
+
+            @Override
+            public void saveWebPage() {
+
+            }
+
             @Override
             public void fullScreenWhenInput(boolean isToHide) {}
         });
@@ -604,6 +617,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void setGraphlessMode(int flag) {}
             @Override
             public void addBookmark() {}
+
+            @Override
+            public void saveWebPage() {
+
+            }
+
             @Override
             public void fullScreenWhenInput(boolean isToHide) {}
         });
@@ -624,6 +643,29 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void addBookmark() {
                 mBookmarkViewModel.insertBookmark(new Bookmark(mWebView.getTitle(), mWebView.getUrl(), UrlUtil.getIconUrl(mWebView.getUrl()), 0, 0, -1, mBookmarkViewModel.getMaxSort(-1) + 1));
                 ToastUtil.shortToast(mContext, "书签保存成功");
+            }
+
+            @Override
+            public void saveWebPage() {
+                if (mProgressBar.getProgress() == 100){
+                    /* 保存网页功能 */
+                    String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
+                    File file = new File(cacheFileDir,System.currentTimeMillis()+mWebView.getTitle()+".mht");
+                    try {
+                        if (!file.exists()){
+                            file.createNewFile();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    mWebView.saveWebArchive(file.getAbsolutePath());
+                    ToastUtil.shortToast(mContext,"保存网页成功！");
+                    Log.i(TAG, "saveWebPage: "+file.getAbsolutePath());
+                }else{
+                    ToastUtil.shortToast(mContext,"当前网页未加载完成！");
+                }
+
+
             }
         });
 
@@ -715,44 +757,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             setTitle(mWebView.getTitle());
             mSearch.setText(mWebView.getTitle());
 
-
-            /* 调用js代码 */
-//            String code = "";
-//            mWebView.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    mWebView.loadUrl(code);
-//                    Log.i(TAG, "run: start download");
-//                }
-//            });
-
             if (!url.endsWith(".mht")) {
-                /* 保存网页功能 */
-//                String cacheFileName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS
-//                        + File.separator + System.currentTimeMillis() + ".xml";
-//                mWebView.saveWebArchive(cacheFileName);
-//                Log.i(TAG, "onPageFinished: "+cacheFileName);
-//                String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
-//                File file = new File(cacheFileDir,"test.mht");
-//                try {
-//                    if (!file.exists()){
-//                        file.createNewFile();
-//                    }
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
-//                mWebView.saveWebArchive(file.getAbsolutePath());
-//                Log.i(TAG, "onPageFinished: "+file.getAbsolutePath());
-//                mWebView.saveWebArchive(cacheFileDir, true, new ValueCallback<String>() {
-//                    @Override
-//                    public void onReceiveValue(String value) {
-//                        if (value == null) {
-//                            Log.i(TAG, "onReceiveValue: saveWebArchive -> " + value);
-//                        } else {
-//                            Log.i(TAG, "onReceiveValue: saveWebArchive -> successfully in " + value);
-//                        }
-//                    }
-//                });
                 // 如果没打开无痕模式且不是主页，则记录浏览的历史记录
                 if (Objects.equals(OptionSPHelper.getPrivateModeValue(), String.valueOf(false)) && !webView.getUrl().equals(getResources().getString(R.string.home_url))) {
                     historyRecordViewModel.insertHistoryRecord(webView.getTitle(), webView.getUrl(), UrlUtil.getIconUrl(webView.getUrl()), new Date());
@@ -850,30 +855,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             super.onReceivedTitle(view, title);
             mSearch.setText(title);
         }
-
-
-        /**
-         * @description 修改js弹出框样式
-         * @param
-         * @return
-         * @author sherman
-         * @time 2021/10/13 21:02
-         */
-//        @Override
-//        public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-//            AlertDialog.Builder b = new AlertDialog.Builder(HomeActivity.this);
-//            b.setTitle("Alert");
-//            b.setMessage(message);
-//            b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialog, int which) {
-//                    result.confirm();
-//                }
-//            });
-//            b.setCancelable(false);
-//            b.create().show();
-//            return true;
-//        }
     }
 
 

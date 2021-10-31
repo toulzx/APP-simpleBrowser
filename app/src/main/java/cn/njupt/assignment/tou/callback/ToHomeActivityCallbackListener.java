@@ -12,6 +12,8 @@ public interface ToHomeActivityCallbackListener {
     void setGraphlessMode(int flag) ;
     // From OptionsDialog to HomeActivity
     void addBookmark();
+    // save webPage
+    void saveWebPage();
 }
 
 

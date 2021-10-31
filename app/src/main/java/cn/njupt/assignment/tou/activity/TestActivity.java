@@ -4,26 +4,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import java.util.Collections;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.adapter.TestAdapter;
-import cn.njupt.assignment.tou.utils.FileUtil;
-import cn.njupt.assignment.tou.utils.OkHttpUtil;
 import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
 public class TestActivity extends AppCompatActivity {

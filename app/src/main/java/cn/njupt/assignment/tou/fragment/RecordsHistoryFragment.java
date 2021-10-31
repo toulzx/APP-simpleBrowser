@@ -182,6 +182,10 @@ public class RecordsHistoryFragment extends Fragment {
             TextView url = view.findViewById(R.id.list_history_url);
             mToHomeActivityCallbackListener.loadUrl(url.getText().toString());
         });
+
+        historyAdapter.setOnFooterClickListener((view,section,datetime)->{
+            historyRecordViewModel.deleteTodayHistory(datetime);
+        });
     }
 
     private void clickHistoryEdit(View view) {

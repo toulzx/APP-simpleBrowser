@@ -38,7 +38,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
     private BottomSheetBehavior<View> mBottomSheetBehavior;
 
     private ImageButton mBtnCancel;
-    private ConstraintLayout mClOptionsBookmarkAdd;
+    private ConstraintLayout mClOptionsBookmarkAdd,mClOptionsWebPageSave;
     private Switch mStOrientation, mStGraphless, mStPrivate;
     private ConstraintLayout mClOptionsHeader;
 
@@ -78,6 +78,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
         mStPrivate = mView.findViewById(R.id.switch_private_mode);
         mClOptionsHeader = mView.findViewById(R.id.options_header_container);
         mClOptionsBookmarkAdd = mView.findViewById(R.id.option_bookmark_add);
+        mClOptionsWebPageSave = mView.findViewById(R.id.option_webview_shot);
 
         // set status
         if (!Objects.equals(OptionSPHelper.getLockOrientationValue(), "auto")) {
@@ -102,6 +103,7 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
         mStGraphless.setOnCheckedChangeListener(this);
         mStPrivate.setOnCheckedChangeListener(this);
         mClOptionsBookmarkAdd.setOnClickListener(this);
+        mClOptionsWebPageSave.setOnClickListener(this);
 
         return mBottomSheetDialog;
     }
@@ -141,6 +143,10 @@ public class OptionsInDialogFragment extends BottomSheetDialogFragment implement
             //设置合起状态
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
+        } else if (view.getId() == R.id.option_webview_shot){
+            mFromDialogOptionsCallbackListener.saveWebPage();
+            //设置合起状态
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
 
     }

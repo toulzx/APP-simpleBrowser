@@ -9,11 +9,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +29,7 @@ import java.util.Map;
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.entity.HistoryList;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
+import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
 /**
  * @author: sherman
@@ -31,6 +40,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         HistoryAdapter.HistoryHeaderViewHolder,
         HistoryAdapter.HistoryHolder,
         HistoryAdapter.HistoryFooterViewHolder> {
+
 
     static class HistoryHolder extends RecyclerView.ViewHolder{
         //显示item部分
@@ -62,6 +72,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
     static class HistoryFooterViewHolder extends RecyclerView.ViewHolder{
 
         private final TextView deleteRecordOfToday;
+        private HistoryRecordViewModel historyRecordViewModel;
         public HistoryFooterViewHolder(@NonNull View itemView) {
             super(itemView);
             deleteRecordOfToday = itemView.findViewById(R.id.history_today_delete);
@@ -76,6 +87,10 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         void onItemClick(View view , int section , int position);
     }
 
+    public interface OnFooterClickListener{
+        void onItemClick(View view , int section ,String datetime);
+    }
+
 
     private List<HistoryRecord> historyRecords;
 
@@ -86,6 +101,8 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
     private OnItemLongClickListener onItemLongClickListener;    /*配置长按事件*/
 
     private OnItemClickListener onItemClickListener;    /*配置点击事件*/
+
+    private OnFooterClickListener onFooterClickListener;
 
     private List<Integer> listOfDelete = new LinkedList<>();
 
@@ -109,6 +126,10 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener){
         this.onItemClickListener = onItemClickListener;
+    }
+
+    public void setOnFooterClickListener(OnFooterClickListener onFooterClickListener){
+        this.onFooterClickListener = onFooterClickListener;
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
@@ -162,6 +183,21 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
     protected void onBindSectionFooterViewHolder(HistoryFooterViewHolder holder, int section) {
         //放删除按钮，删除按钮的值是历史是时间
         holder.deleteRecordOfToday.setText("删除"+allRecords.get(section).getTime()+"的记录");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String date = allRecords.get(section).getTime();
+        String datetime;
+        if (date.startsWith("今天")){
+            Date today = new Date();
+            datetime = simpleDateFormat.format(today);
+        }else{
+            datetime = date;
+        }
+        //点击事件
+        if (onFooterClickListener != null) {
+            holder.deleteRecordOfToday.setOnClickListener(v -> {
+                onFooterClickListener.onItemClick(holder.itemView, section, datetime);
+            });
+        }
     }
 
     @Override
