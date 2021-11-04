@@ -2,6 +2,7 @@ package cn.njupt.assignment.tou.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -101,6 +102,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final int ALLOW_IMAGE_LOADED = 1;
     public static final int PROHIBIT_IMAGE_LOADED = 0;
+
+    //动态获取权限需要添加的常量
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE" };
 
     public static ToDialogRecordsCallbackListener mToDialogRecordsCallbackListener;
     public static void setToDialogRecordsCallbackListener(ToDialogRecordsCallbackListener listener) {
@@ -621,28 +628,43 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 ToastUtil.shortToast(mContext, "书签保存成功");
             }
 
+            // 保存网页
             @Override
             public void saveWebPage() {
-                if (mProgressBar.getProgress() == 100){
-                    /* 保存网页功能 */
-                    String cacheFileDir = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DOWNLOADS;
-                    File file = new File(cacheFileDir,System.currentTimeMillis()+mWebView.getTitle()+".mht");
-                    try {
-                        if (!file.exists()){
-                            file.createNewFile();
-                        }
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                    mWebView.saveWebArchive(file.getAbsolutePath());
-                    ToastUtil.shortToast(mContext,"保存网页成功！");
-                    Log.i(TAG, "saveWebPage: "+file.getAbsolutePath());
+                verifyStoragePermissions(HomeActivity.this);
+                //检测是否有写的权限
+                int permission = ActivityCompat.checkSelfPermission(HomeActivity.this,
+                        "android.permission.WRITE_EXTERNAL_STORAGE");
+                if (permission != PackageManager.PERMISSION_GRANTED) {
+                    // 没有写的权限，去申请写的权限，会弹出对话框
+                    ToastUtil.shortToast(mContext,"没有保存文件的权限！");
                 }else{
-                    ToastUtil.shortToast(mContext,"当前网页未加载完成！");
+                    // 如果网页加载完成
+                    if (mProgressBar.getProgress() == 100){
+                        // 获取外部存储路径
+                        File fileDir = mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                        // 创建文件
+                        File file = new File(fileDir.getAbsolutePath(),System.currentTimeMillis()+mWebView.getTitle()+".mht");
+                        try {
+                            if (!file.exists()){
+                                file.createNewFile();
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        // 保存网页内容
+                        mWebView.saveWebArchive(file.getAbsolutePath());
+                        // 提示信息
+                        ToastUtil.shortToast(mContext,"保存网页成功！");
+                        // 打印存储绝对路径
+                        Log.i(TAG, "saveWebPage: "+file.getAbsolutePath());
+                    }else{
+                        // 网页未加载完成
+                        ToastUtil.shortToast(mContext,"当前网页未加载完成！");
+                    }
                 }
             }
         });
-
     }
 
     /**
@@ -946,6 +968,21 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
         return verName;
+    }
+
+    // 检测权限
+    public static void verifyStoragePermissions(Activity activity) {
+        try {
+            //检测是否有写的权限
+            int permission = ActivityCompat.checkSelfPermission(activity,
+                    "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                // 没有写的权限，去申请写的权限，会弹出对话框
+                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE,REQUEST_EXTERNAL_STORAGE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

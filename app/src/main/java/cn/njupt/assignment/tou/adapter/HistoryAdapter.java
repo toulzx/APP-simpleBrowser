@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide;
 import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.Date;
 import java.util.List;
 
 import cn.njupt.assignment.tou.R;
