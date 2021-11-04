@@ -14,9 +14,6 @@
         android:theme="@style/Theme.SimpleBrowser"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".activity.PagerActivity"
-            android:exported="true" />
-        <activity
             android:name=".activity.HomeActivity"
             android:exported="true"
             android:screenOrientation="unspecified"

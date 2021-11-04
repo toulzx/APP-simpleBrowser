@@ -15,20 +15,20 @@ import android.widget.FrameLayout;
  * @date 2021/10/15 15:46
  * @author tou
  */
-public class AndroidBug5497Workaround {
+public class AndroidBug5497Util {
 
     // For more information, see https://issuetracker.google.com/issues/36911528
     // To use this class, simply invoke assistActivity() on an Activity that already has its content view set.
 
     public static void assistActivity (Activity activity) {
-        new AndroidBug5497Workaround(activity);
+        new AndroidBug5497Util(activity);
     }
 
     private View mChildOfContent;
     private int usableHeightPrevious;
     private FrameLayout.LayoutParams frameLayoutParams;
 
-    private AndroidBug5497Workaround(Activity activity) {
+    private AndroidBug5497Util(Activity activity) {
         FrameLayout content = (FrameLayout) activity.findViewById(android.R.id.content);
         mChildOfContent = content.getChildAt(0);
         mChildOfContent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {

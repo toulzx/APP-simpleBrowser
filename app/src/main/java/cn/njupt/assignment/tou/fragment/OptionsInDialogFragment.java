@@ -25,7 +25,7 @@ import java.util.Objects;
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
 import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
-import cn.njupt.assignment.tou.utils.OptionSPHelper;
+import cn.njupt.assignment.tou.helper.OptionSPHelper;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 
 public class OptionsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener, SwitchCompat.OnCheckedChangeListener {

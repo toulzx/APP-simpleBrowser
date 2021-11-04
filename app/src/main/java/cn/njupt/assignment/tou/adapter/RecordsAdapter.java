@@ -13,9 +13,9 @@ import java.util.List;
 import cn.njupt.assignment.tou.fragment.RecordsBookmarkFragment;
 import cn.njupt.assignment.tou.fragment.RecordsHistoryFragment;
 
-public class RecordsViewPager2Adapter extends FragmentStateAdapter {
+public class RecordsAdapter extends FragmentStateAdapter {
 
-    private static final String TAG = RecordsViewPager2Adapter.class.getSimpleName();
+    private static final String TAG = RecordsAdapter.class.getSimpleName();
 
     // index in viewPager2
     public static final int HISTORY_PAGE_INDEX = 0;
@@ -29,7 +29,7 @@ public class RecordsViewPager2Adapter extends FragmentStateAdapter {
     //得用hashset防重，用于存储adapter内的顺序
     private HashSet<Long> creatIds = new HashSet<>();
 
-    public RecordsViewPager2Adapter(@NonNull Fragment fragment) {
+    public RecordsAdapter(@NonNull Fragment fragment) {
         super(fragment);
     }
 

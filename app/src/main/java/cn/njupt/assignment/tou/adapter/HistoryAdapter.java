@@ -188,7 +188,6 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
     //绑定item的数据
     @Override
     protected void onBindItemViewHolder(HistoryHolder holder, int section, int position) {
-        Log.i("DemoAdapter", "onBindItemViewHolder: start");
         HistoryList beans = allRecords.get(section);
         HistoryRecord bean = beans.getListOfDay().get(position);
 

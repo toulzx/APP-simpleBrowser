@@ -69,14 +69,16 @@ public class sWebView extends WebView {
     public OnScrollChangedCallback getOnScrollChangedCallback() {
         return mOnScrollChangedCallback;
     }
+
     public void setOnScrollChangedCallback(
             final OnScrollChangedCallback onScrollChangedCallback) {
         mOnScrollChangedCallback = onScrollChangedCallback;
     }
+
     /**
      * Impliment in the activity/fragment/view that you want to listen to the webview
      */
-    public static interface OnScrollChangedCallback {
+    public interface OnScrollChangedCallback {
         public void onScroll(int dx, int dy);
     }
 
@@ -99,4 +101,5 @@ public class sWebView extends WebView {
         return getScale();
 
     }
+
 }

@@ -55,18 +55,19 @@ import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.fragment.BarFooterFragment;
 import cn.njupt.assignment.tou.fragment.BarHeaderFragment;
 import cn.njupt.assignment.tou.fragment.OptionsInDialogFragment;
+import cn.njupt.assignment.tou.fragment.PagesInDialogFragment;
 import cn.njupt.assignment.tou.fragment.RecordsBookmarkFragment;
 import cn.njupt.assignment.tou.fragment.RecordsHistoryFragment;
 import cn.njupt.assignment.tou.fragment.RecordsInDialogFragment;
-import cn.njupt.assignment.tou.utils.OptionSPHelper;
+import cn.njupt.assignment.tou.helper.OptionSPHelper;
+import cn.njupt.assignment.tou.utils.BitmapUtil;
 import cn.njupt.assignment.tou.utils.ToastUtil;
 import cn.njupt.assignment.tou.utils.UrlUtil;
-import cn.njupt.assignment.tou.utils.WebViewFragment;
-import cn.njupt.assignment.tou.utils.WebViewHelper;
+import cn.njupt.assignment.tou.helper.WebViewPageHelper;
 import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
 import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 
-public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
+public class HomeActivity extends AppCompatActivity implements View.OnClickListener{
 
     private final static String TAG = HomeActivity.class.getSimpleName();
 
@@ -134,7 +135,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         if (mWebView != null) {
             mWebView.saveState(outState);
         }
-        WebViewHelper.currentBundle = outState;
+        WebViewPageHelper.currentBundle = outState;
     }
 
     @Override
@@ -181,7 +182,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     ToastUtil.shortToast(mContext, "再按一次退出程序");
                     exitTime = System.currentTimeMillis();
                 } else {
-                    super.onBackPressed();
+                    moveTaskToBack(true);
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                    System.exit(1);
                 }
             }
 
@@ -226,37 +229,23 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mRecords.setOnClickListener(this);
         mPages.setOnClickListener(this);
 
-        mSearch.setAdapter(autoMatchingInTimeAdapter);
-        mSearch.setThreshold(2);
-
-        mSearch.addTextChangedListener(new TextWatcher() {
+        mPages.setLongClickable(true);
+        mPages.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                System.out.println("--------------" + s.toString());
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                System.out.println("+++++++++++++++++++++++++++++++++:" + s.toString());
-                if (s.toString().equals("") || s.toString() == null) {
-                    autoMatchingInTimeAdapter.clearHistoryRecords();
-                } else {
-                    historyRecordViewModel.getFuzzySearchInfo(s.toString()).observe(HomeActivity.this, historyRecords -> {
-                        Collections.sort(historyRecords);
-                        autoMatchingInTimeAdapter.setHistoryRecords(historyRecords);
-                    });
-                }
-                //刷新视图
-                autoMatchingInTimeAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
+            public boolean onLongClick(View v) {
+                // if long clicked, update current WebViewPage AND create new WebViewPage.
+                mWebView.setDrawingCacheEnabled(true);
+                Bitmap b = BitmapUtil.currentActivityShot(HomeActivity.this);
+                Log.i(TAG, "[abc]onLongClick: Bitmap = " + b);
+                WebViewPageHelper.setCurrentBundle(null);
+                WebViewPageHelper.updateCurrentPage(mWebView, b, true);
+                startActivity(new Intent(HomeActivity.this, HomeActivity.class));
+                return false;
             }
         });
 
-
+        mSearch.setAdapter(autoMatchingInTimeAdapter);
+        mSearch.setThreshold(2);
 
         setListener();
 
@@ -276,20 +265,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         mWebView.setWebViewClient(new sWebViewClient(){});
         mWebView.setWebChromeClient(new sWebChromeClient(){});
-
-        /* 重写 WebView 的 onScroll 实现自适应全屏模式 */
-        mWebView.setOnScrollChangedCallback(new sWebView.OnScrollChangedCallback(){
-            public void onScroll(int dx, int dy){
-                // 判断是否启动了强制全屏模式
-                if (Objects.equals(OptionSPHelper.getForceFullScreenValue(), String.valueOf(true))) return;
-                // 自适应全屏
-                if (dy > 25) {
-                    setBarStatus(true);
-                } else if ( dy < -25 ) {
-                    setBarStatus(false);
-                }
-            }
-        });
 
 
         /* 设置 */
@@ -341,28 +316,21 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mWebSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         // 加载主页
-        if (WebViewHelper.currentWebView!=null){
+        if (WebViewPageHelper.currentBundle != null){
             // 多窗口原有记录
-            if (WebViewHelper.currentBundle!=null){
-                mWebView.restoreState(WebViewHelper.currentBundle);
-                mSearch.setText(WebViewHelper.currentWebView.getUrl());
-            }else{
-                mWebView.loadUrl(WebViewHelper.currentWebView.getUrl());
-            }
+                mWebView.restoreState(WebViewPageHelper.currentBundle);
+                mSearch.setText(WebViewPageHelper.getCurrentWebView().getUrl());
         } else {
             // 首次加载
             mWebView.loadUrl(getResources().getString(R.string.home_url));
         }
-
-        // 多窗口模式 helper
-        WebViewHelper.headWebView = WebViewHelper.currentWebView;
 
     }
 
 
 
     /**
-     *初始化 SharedPreferences 和控件
+     *初始化 SharedPreferences 和 WebViewPageHelper 和设置信息
      * @return void
      * @date 2021/10/14 17:55
      * @author tou
@@ -411,11 +379,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
-            if (mFooter.isHidden() || mHeader.isHidden()) {
-                setBarStatus(false);
-            } else {
-                setBarStatus(true);
-            }
+            setBarStatus(!mFooter.isHidden() && !mHeader.isHidden());
 
             // 设置强制全屏
             OptionSPHelper.setValue(String.valueOf(true), null, null, null, null);
@@ -476,33 +440,23 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             new OptionsInDialogFragment().show(getSupportFragmentManager(), OptionsInDialogFragment.class.getSimpleName());
 
+
         } else if (id == R.id.img_view_records) {
 
             new RecordsInDialogFragment().show(getSupportFragmentManager(), RecordsInDialogFragment.class.getSimpleName());
 
-
         } else if (id == R.id.img_view_pages) {
-            // TODO
-            // Toast.makeText(mContext, "pages 功能开发中", Toast.LENGTH_SHORT).show();
-            WebViewHelper.headWebView = mWebView;
-            if (!WebViewHelper.isExist) {
-                if (mWebView == null) {
-                    Log.e("houxl", "生成空窗口");
-                    WebViewHelper.webList.add(new WebViewFragment(null, myShot(HomeActivity.this)));
-                    WebViewHelper.currentWebView = null;
-                } else {
-                    Log.e("houxl", "生成实时窗口");
-                    WebViewHelper.currentWebView = mWebView;
-                    mWebView.setDrawingCacheEnabled(true);
-                    WebViewHelper.webList.add(new WebViewFragment(mWebView, myShot(HomeActivity.this)));
-                }
-                WebViewHelper.isExist = true;
-            }
-            Intent intent=new Intent(HomeActivity.this, PagerActivity.class);
-            startActivity(intent);
-        }
 
+            // when change action of webView happened, update webViewPage
+            mWebView.setDrawingCacheEnabled(true);
+            Bitmap b =BitmapUtil.currentActivityShot(HomeActivity.this);
+            Log.i(TAG, "[abc]onClick: Bitmap = "+b);
+            WebViewPageHelper.updateCurrentPage(mWebView, b, false);
+            new PagesInDialogFragment().show(getSupportFragmentManager(), PagesInDialogFragment.class.getSimpleName());
+
+        }
     }
+
 
     /**
      * 其它监听器的设置
@@ -553,6 +507,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        // 自动匹配-搜索框内容被点击时
         mSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -564,27 +519,60 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-         // 网页内调用软键盘时
-        BarFooterFragment.SetToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
+        // 自动匹配-搜索内容变化时
+        mSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void loadUrl(String url) {}
-            @Override
-            public void setGraphlessMode(int flag) {}
-            @Override
-            public void addBookmark() {}
-
-            @Override
-            public void saveWebPage() {
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                System.out.println("--------------" + s.toString());
             }
 
             @Override
-            public void fullScreenWhenInput(boolean isToHide) {
-                if (!mSearch.hasFocus()) {
-                    setBarStatus(isToHide);
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                System.out.println("+++++++++++++++++++++++++++++++++:" + s.toString());
+                if (s.toString().equals("") || s.toString() == null) {
+                    autoMatchingInTimeAdapter.clearHistoryRecords();
+                } else {
+                    historyRecordViewModel.getFuzzySearchInfo(s.toString()).observe(HomeActivity.this, historyRecords -> {
+                        Collections.sort(historyRecords);
+                        autoMatchingInTimeAdapter.setHistoryRecords(historyRecords);
+                    });
+                }
+                //刷新视图
+                autoMatchingInTimeAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        // 当滑动网页时自动全屏模式
+        mWebView.setOnScrollChangedCallback(new sWebView.OnScrollChangedCallback(){
+            public void onScroll(int dx, int dy){
+                // 判断是否启动了强制全屏模式
+                if (Objects.equals(OptionSPHelper.getForceFullScreenValue(), String.valueOf(true))) return;
+                // 自适应全屏
+                if (dy > 15) {
+                    setBarStatus(true);
+                } else if ( dy < -15 ) {
+                    setBarStatus(false);
                 }
             }
         });
+
+        // 当网页内输入时进入全屏模式
+        mWebView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                Log.i(TAG, "onLayoutChange: webView bottom changed = " + (bottom-oldBottom));
+                if (bottom-oldBottom != 0 && !mSearch.hasFocus()) {
+                    setBarStatus(bottom - oldBottom < 0);
+                }
+            }
+        });
+
+        /* 回调函数 */
 
         // 书签访问跳转
         RecordsBookmarkFragment.setToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
@@ -597,14 +585,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void setGraphlessMode(int flag) {}
             @Override
             public void addBookmark() {}
-
             @Override
-            public void saveWebPage() {
-
-            }
-
-            @Override
-            public void fullScreenWhenInput(boolean isToHide) {}
+            public void saveWebPage() {}
         });
 
         // 历史记录访问跳转
@@ -620,20 +602,13 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void addBookmark() {}
 
             @Override
-            public void saveWebPage() {
-
-            }
-
-            @Override
-            public void fullScreenWhenInput(boolean isToHide) {}
+            public void saveWebPage() {}
         });
 
         // 无图模式、添加书签
         OptionsInDialogFragment.SetToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {
             @Override
             public void loadUrl(String url) {}
-            @Override
-            public void fullScreenWhenInput(boolean isToHide) {}
 
             @Override
             public void setGraphlessMode(int flag) {
@@ -665,8 +640,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 }else{
                     ToastUtil.shortToast(mContext,"当前网页未加载完成！");
                 }
-
-
             }
         });
 
@@ -938,7 +911,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * 设置是否自动加载图片
      * 注意 Options 中的设置通过回调函数实现
      * 注意 setLoadsImagesAutomatically 必须始终允许，它关联的不仅是网页上的图片。
-//     * @param flag:
+     * @param flag:
      * @return void
      * @date 2021/9/22 15:01
      * @author tou
@@ -956,34 +929,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
-    }
-
-    public Bitmap myShot(Activity activity) {
-        // 获取windows中最顶层的view
-        View view = activity.getWindow().getDecorView();
-        view.buildDrawingCache();
-
-        // 获取状态栏高度
-        Rect rect = new Rect();
-        view.getWindowVisibleDisplayFrame(rect);
-        int statusBarHeights = rect.top;
-        Display display = activity.getWindowManager().getDefaultDisplay();
-
-        // 获取屏幕宽和高
-        int widths = display.getWidth();
-        int heights = display.getHeight();
-
-        // 允许当前窗口保存缓存信息
-        view.setDrawingCacheEnabled(true);
-
-        // 去掉状态栏
-        Bitmap bmp = Bitmap.createBitmap(view.getDrawingCache(), 0,
-                statusBarHeights, widths, heights - statusBarHeights);
-
-        // 销毁缓存信息
-        view.destroyDrawingCache();
-
-        return bmp;
     }
 
     /**

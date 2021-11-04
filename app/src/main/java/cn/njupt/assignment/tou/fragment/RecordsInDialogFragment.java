@@ -23,11 +23,11 @@ import java.util.Objects;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.activity.HomeActivity;
-import cn.njupt.assignment.tou.adapter.RecordsViewPager2Adapter;
+import cn.njupt.assignment.tou.adapter.RecordsAdapter;
 import cn.njupt.assignment.tou.callback.ToBookmarkCallbackListener;
 import cn.njupt.assignment.tou.callback.ToHistoryCallbackListener;
 import cn.njupt.assignment.tou.callback.ToDialogRecordsCallbackListener;
-import cn.njupt.assignment.tou.utils.OptionSPHelper;
+import cn.njupt.assignment.tou.helper.OptionSPHelper;
 
 public class RecordsInDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
@@ -56,7 +56,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
     private TextView checked_cancel;
 
     private TabLayoutMediator mTabLayoutMediator;
-    private RecordsViewPager2Adapter mViewPager2Adapter;
+    private RecordsAdapter mViewPager2Adapter;
 
     private static final String[] TAB_NAMES = new String[]{"history", "bookmark" };
 
@@ -119,7 +119,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         }
 
         // bind Adapter
-        mViewPager2Adapter = new RecordsViewPager2Adapter(this);
+        mViewPager2Adapter = new RecordsAdapter(this);
         mViewPager2.setAdapter(mViewPager2Adapter);
 
         // 允许 viewPager2 横向滚动
@@ -130,12 +130,12 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
         if (Objects.equals(OptionSPHelper.getTargetBookmarkPageValue(), "true")) {
             mBtnSet.setText("更多");
             mIsBookmarkEditMode = false;
-            mViewPager2.setCurrentItem(RecordsViewPager2Adapter.BOOKMARK_PAGE_INDEX);
+            mViewPager2.setCurrentItem(RecordsAdapter.BOOKMARK_PAGE_INDEX);
             mBtnCancel.setText(mIsBookmarkInHomePage ? "关闭" : "返回");
             mTvBookmarkUpperFolderName.setText(mIsBookmarkInHomePage ? "" : "上一级：" + mStrBookmarkUpperFolderName);
         } else {
             mBtnSet.setText("清除");
-            mViewPager2.setCurrentItem(RecordsViewPager2Adapter.HISTORY_PAGE_INDEX);
+            mViewPager2.setCurrentItem(RecordsAdapter.HISTORY_PAGE_INDEX);
         }
 
 
@@ -155,7 +155,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 // 记录 viewPager2 最后使用的页面
-                if (position == RecordsViewPager2Adapter.BOOKMARK_PAGE_INDEX) {
+                if (position == RecordsAdapter.BOOKMARK_PAGE_INDEX) {
                     if (mIsBookmarkEditMode) {
                         mBtnSet.setText("删除");
                         mBtnCancel.setText("移动至");
@@ -176,7 +176,7 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
                     }
 
                     OptionSPHelper.setValue(null,null,null,null, "true");
-                } else if (position == RecordsViewPager2Adapter.HISTORY_PAGE_INDEX) {
+                } else if (position == RecordsAdapter.HISTORY_PAGE_INDEX) {
                     mBtnSet.setText("清除");
                     mBtnCancel.setText("关闭");
                     mTvBookmarkUpperFolderName.setVisibility(View.GONE);
@@ -331,11 +331,11 @@ public class RecordsInDialogFragment extends BottomSheetDialogFragment implement
 
         } else if (view.getId() == R.id.btn_records_ultra_set) {
 
-            if (mViewPager2.getCurrentItem() == RecordsViewPager2Adapter.BOOKMARK_PAGE_INDEX) {
+            if (mViewPager2.getCurrentItem() == RecordsAdapter.BOOKMARK_PAGE_INDEX) {
                 if (mToBookmarkCallbackListener != null) {
                     mToBookmarkCallbackListener.onMenuButtonClick(view);
                 }
-            } else if (mViewPager2.getCurrentItem() == RecordsViewPager2Adapter.HISTORY_PAGE_INDEX) {
+            } else if (mViewPager2.getCurrentItem() == RecordsAdapter.HISTORY_PAGE_INDEX) {
                 if (mToHistoryCallbackListener != null) {
                     mToHistoryCallbackListener.onHistoryButtonClick(view);
                 }

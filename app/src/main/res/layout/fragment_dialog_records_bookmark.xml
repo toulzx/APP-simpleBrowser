@@ -6,7 +6,7 @@
         <import type="android.view.View.OnClickListener" />
         <variable
             name="operationclick"
-            type="OnClickListener"></variable>
+            type="OnClickListener" />
     </data>
 
     <LinearLayout

@@ -1,6 +1,7 @@
 package cn.njupt.assignment.tou.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,27 +18,12 @@ public class BarFooterFragment extends Fragment {
 
     private View mView;
 
-    public static ToHomeActivityCallbackListener mToHomeActivityCallbackListener;
-    public static void SetToHomeActivityCallbackListener(ToHomeActivityCallbackListener listener) {
-        mToHomeActivityCallbackListener = listener;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (mView == null) {
             mView = inflater.inflate(R.layout.fragment_bar_footer, container, false);
         }
-
-        ConstraintLayout constraintLayout = mView.findViewById(R.id.bar_footer_container);
-        constraintLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if (bottom - oldBottom < 0) {
-                    mToHomeActivityCallbackListener.fullScreenWhenInput(true);
-                }
-            }
-        });
 
         return mView;
     }
