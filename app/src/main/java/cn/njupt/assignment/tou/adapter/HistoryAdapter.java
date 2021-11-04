@@ -7,24 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
-
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import cn.njupt.assignment.tou.R;
 import cn.njupt.assignment.tou.entity.HistoryList;
@@ -34,7 +24,7 @@ import cn.njupt.assignment.tou.viewmodel.HistoryRecordViewModel;
 /**
  * @author: sherman
  * @date: 2021/10/8
- * @description: 作为 history 的 adapter
+ * @description: 历史记录的adapter
  */
 public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         HistoryAdapter.HistoryHeaderViewHolder,
@@ -60,6 +50,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         }
     }
 
+    //头部
     static class HistoryHeaderViewHolder extends RecyclerView.ViewHolder{
 
         private final TextView time;
@@ -69,6 +60,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         }
     }
 
+    //底部
     static class HistoryFooterViewHolder extends RecyclerView.ViewHolder{
 
         private final TextView deleteRecordOfToday;
@@ -100,11 +92,9 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
 
     private OnItemLongClickListener onItemLongClickListener;    /*配置长按事件*/
 
-    private OnItemClickListener onItemClickListener;    /*配置点击事件*/
+    private OnItemClickListener onItemClickListener;    /*配置item点击事件*/
 
-    private OnFooterClickListener onFooterClickListener;
-
-    private List<Integer> listOfDelete = new LinkedList<>();
+    private OnFooterClickListener onFooterClickListener; /*配置底部点击事件*/
 
     public HistoryAdapter(Context context){
         this.context = context;
@@ -116,10 +106,12 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         this.allRecords = allRecords;
     }
 
+    //注入所有历史记录
     public void setAllRecords(List<HistoryList> allRecords){
         this.allRecords = allRecords;
     }
 
+    //设置历史记录
     public void setHistoryRecords(List<HistoryRecord> historyRecords) {
         this.historyRecords = historyRecords;
     }
@@ -136,19 +128,8 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         this.onItemLongClickListener = onItemLongClickListener;
     }
 
-    public void setListOfDelete(List<Integer> listOfDelete) {
-        this.listOfDelete = listOfDelete;
-    }
 
-    public List<Integer> getListOfDelete(){
-        return this.listOfDelete;
-    }
-
-    public void init(){
-        listOfDelete.clear();
-        this.notifyDataSetChanged();
-    }
-
+    //创建itemViewHolder
     @NonNull
     @Override
     protected HistoryHolder onCreateItemViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -161,24 +142,28 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         return new HistoryHolder(itemView);
     }
 
+    //创建头部viewHolder
     @Override
     protected HistoryHeaderViewHolder onCreateSectionHeaderViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(context).inflate(R.layout.layout_history_header, parent, false);
         return new HistoryHeaderViewHolder(itemView);
     }
 
+    //创建底部viewHolder
     @Override
     protected HistoryFooterViewHolder onCreateSectionFooterViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(context).inflate(R.layout.layout_history_footer, parent, false);
         return new HistoryFooterViewHolder(itemView);
     }
 
+    //绑定头部viewHolder数据
     @Override
     protected void onBindSectionHeaderViewHolder(HistoryHeaderViewHolder holder, int section) {
         //放时间进去即可
         holder.time.setText(allRecords.get(section).getTime());
     }
 
+    //绑定底部viewHolder
     @Override
     protected void onBindSectionFooterViewHolder(HistoryFooterViewHolder holder, int section) {
         //放删除按钮，删除按钮的值是历史是时间
@@ -200,6 +185,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         }
     }
 
+    //绑定item的数据
     @Override
     protected void onBindItemViewHolder(HistoryHolder holder, int section, int position) {
         Log.i("DemoAdapter", "onBindItemViewHolder: start");
@@ -233,6 +219,7 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         }
     }
 
+    //获取section数量
     @Override
     protected int getSectionCount() {
         if (allRecords == null){
@@ -241,11 +228,13 @@ public class HistoryAdapter extends SectionedRecyclerViewAdapter<
         return allRecords.size();
     }
 
+    //获取每个section中item的数量
     @Override
     protected int getItemCountForSection(int section) {
         return allRecords.get(section).getListOfDay().size();
     }
 
+    //设置开启底部栏
     @Override
     protected boolean hasFooterInSection(int section) {
         return true;

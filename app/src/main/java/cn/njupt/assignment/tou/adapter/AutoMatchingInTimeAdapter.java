@@ -1,8 +1,6 @@
 package cn.njupt.assignment.tou.adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -20,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.activity.HomeActivity;
 import cn.njupt.assignment.tou.entity.HistoryRecord;
 
 /**
@@ -32,20 +29,23 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
 
     private List<HistoryRecord> data;
 
+    //历史记录
     private List<HistoryRecord> historyRecords;
 
+    //上下文
     private Context context;
 
-    private TestAdapter.OnItemClickListener onItemClickListener;
+    //设置item点击监听器，在HomeActivity中进行回调
+    private OnItemClickListener onItemClickListener;
 
     public interface OnItemClickListener{
         void onItemClick(View view , int position);
     }
-    public void setOnItemClickListener(TestAdapter.OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
-    public TestAdapter.OnItemClickListener getOnItemClickListener(){
+    public OnItemClickListener getOnItemClickListener(){
         return this.onItemClickListener;
     }
 
@@ -63,10 +63,12 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
         this.historyRecords = historyRecords;
     }
 
+    //清除历史记录
     public void clearHistoryRecords(){
         this.historyRecords.clear();
     }
 
+    //获取item数量
     @Override
     public int getCount() {
         if (historyRecords == null){
@@ -76,6 +78,7 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
         }
     }
 
+    //获取指定位置的item
     @Override
     public Object getItem(int position) {
         if (historyRecords == null) {
@@ -85,6 +88,7 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
         }
     }
 
+    //获取item的id
     @Override
     public long getItemId(int position) {
         return position;
@@ -93,12 +97,13 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         HistoryRecord record = historyRecords.get(position);
-        TestAdapter.ViewHolder viewHolder;
+        ViewHolder viewHolder;
         View view;
 
         if (convertView == null){
             view = View.inflate(context,R.layout.auto_matching_list_unit,null);
-            viewHolder = new TestAdapter.ViewHolder();
+            //用viewHolder存储控件信息
+            viewHolder = new ViewHolder();
             viewHolder.image = view.findViewById(R.id.Search_list_history_image);
             viewHolder.name = view.findViewById(R.id.Search_list_history_name);
             viewHolder.url = view.findViewById(R.id.Search_list_history_url);
@@ -107,19 +112,14 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
             view.setTag(viewHolder);
         }else{
             view = convertView;
-            viewHolder = (TestAdapter.ViewHolder) view.getTag();
+            viewHolder = (ViewHolder) view.getTag();
         }
 
+        //绑定数据
         Glide.with(viewHolder.image.getContext()).load(record.getHicon()).into(viewHolder.image);
         viewHolder.name.setText(record.getHname());
         viewHolder.url.setText(record.getHurl());
         viewHolder.id.setText(String.valueOf(record.getId()));
-//        viewHolder.layout.setOnClickListener(v -> {
-//            TextView url = view.findViewById(R.id.Search_list_history_url);
-//            Intent intent = new Intent(AutoMatchingInTimeAdapter.this.context, HomeActivity.class);
-//            intent.putExtra("history_url",url.getText().toString());
-//            AutoMatchingInTimeAdapter.this.context.startActivity(intent);
-//        });
 
         return view;
     }
@@ -133,6 +133,7 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
 
     }
 
+    //过滤器
     @Override
     public Filter getFilter() {
         Filter filter = new Filter() {
@@ -150,6 +151,7 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
                 return results;
             }
 
+            //设置过滤器返回的结果
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 data = (List<HistoryRecord>) results.values;

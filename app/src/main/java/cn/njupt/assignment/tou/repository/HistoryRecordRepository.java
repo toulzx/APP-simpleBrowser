@@ -22,10 +22,10 @@ import cn.njupt.assignment.tou.utils.DataConversionFactory;
  */
 
 public class HistoryRecordRepository {
-    private LiveData<List<HistoryRecord>> historyRecordAll;
-    private HistoryRecordDao historyRecordDao;
-    private LiveData<List<HistoryRecord>> historyByInput;
-    private LiveData<List<HistoryRecord>> historyByTime;
+    private LiveData<List<HistoryRecord>> historyRecordAll;//表中所有的历史记录
+    private HistoryRecordDao historyRecordDao;//跟历史记录表进行交互的dao层
+    private LiveData<List<HistoryRecord>> historyByInput;//根据用户输入实时获取的历史记录
+    private LiveData<List<HistoryRecord>> historyByTime;//根据时间实时获取的历史记录
 
     public HistoryRecordRepository(Context context){
         BrowserDatabase browserDatabase = BrowserDatabase.getDatabase(context.getApplicationContext());

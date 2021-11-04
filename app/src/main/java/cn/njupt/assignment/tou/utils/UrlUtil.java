@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * @author: sherman
  * @date: 2021/10/12
- * @description: 处理url拿到icon的工具类
+ * @description: 工具类：处理url拿到icon；判断url是否合法
  */
 public class UrlUtil {
 

@@ -14,15 +14,7 @@
         android:theme="@style/Theme.SimpleBrowser"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".activity.TestActivity"
-            android:exported="true">
-        </activity>
-        <activity
             android:name=".activity.PagerActivity"
-            android:exported="true" />
-        <activity
-            android:name=".activity.AutoMatchingActivity"
-            android:windowSoftInputMode="adjustUnspecified"
             android:exported="true" />
         <activity
             android:name=".activity.HomeActivity"

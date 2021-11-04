@@ -7,7 +7,6 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 /**
@@ -18,20 +17,20 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "historyRecord")
 public class HistoryRecord extends BaseObservable implements Parcelable,Comparable<HistoryRecord> {
     @PrimaryKey(autoGenerate = true) // 设置主键
-    @ColumnInfo(name = "id") // 定义对应的数据库的字段名成
-    private int id;
+    @ColumnInfo(name = "id") // 定义对应的数据库的字段名称
+    private int id;// 主键
 
     @ColumnInfo(name = "hname")
-    private String hname;
+    private String hname;// 网站标题
 
     @ColumnInfo(name = "hurl")
-    private String hurl;
+    private String hurl;// 网站链接
 
     @ColumnInfo(name = "hicon")
-    private String hicon;
+    private String hicon;// 网站图标
 
     @ColumnInfo(name = "hdate")
-    private String hdate;
+    private String hdate;// 访问网站的时间
 
 
     public HistoryRecord(String hname, String hurl, String hicon, String hdate) {
