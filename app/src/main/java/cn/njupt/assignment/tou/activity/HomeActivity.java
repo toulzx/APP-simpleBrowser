@@ -557,11 +557,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 TextView url = view.findViewById(R.id.Search_list_history_url);
-                mSearch.clearFocus();
                 mWebView.loadUrl(url.getText().toString());
+                if (inputMethodManager.isActive())
+                    inputMethodManager.hideSoftInputFromWindow(mSearch.getApplicationWindowToken(), 0);
+                mSearch.clearFocus();
             }
         });
-        /* 回调函数 */
 
          // 网页内调用软键盘时
         BarFooterFragment.SetToHomeActivityCallbackListener(new ToHomeActivityCallbackListener() {

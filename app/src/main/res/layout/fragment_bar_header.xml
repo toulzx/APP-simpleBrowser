@@ -40,7 +40,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/img_view_resize"
-            app:layout_constraintRight_toLeftOf="@+id/img_view_reload" />
+            app:layout_constraintRight_toLeftOf="@+id/img_view_reload"/>
 
         <ImageView
             android:id="@+id/img_view_reload"

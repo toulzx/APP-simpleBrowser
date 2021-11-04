@@ -65,7 +65,9 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
 
     //清除历史记录
     public void clearHistoryRecords(){
-        this.historyRecords.clear();
+        if (this.historyRecords!=null&&this.historyRecords.size()>0)
+            this.historyRecords.clear();
+        this.notifyDataSetChanged();
     }
 
     //获取item数量
