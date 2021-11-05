@@ -326,6 +326,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         if (WebViewPageHelper.currentBundle != null){
             // 多窗口原有记录
                 mWebView.restoreState(WebViewPageHelper.currentBundle);
+                if (WebViewPageHelper.getCurrentWebView() == null) {
+                    WebViewPageHelper.setCurrentWebView(mWebView, 0);
+                }
                 mSearch.setText(WebViewPageHelper.getCurrentWebView().getUrl());
         } else {
             // 首次加载

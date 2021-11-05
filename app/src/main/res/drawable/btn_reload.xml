@@ -3,5 +3,5 @@
     <item android:state_pressed="true"
         android:drawable="@mipmap/reload_touched" />
     <item
-        android:drawable="@mipmap/reload_day" />
+        android:drawable="@mipmap/reload" />
 </selector>

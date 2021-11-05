@@ -3,5 +3,5 @@
     <item android:state_pressed="true"
         android:drawable="@mipmap/resize_touched" />
     <item
-        android:drawable="@mipmap/resize_day" />
+        android:drawable="@mipmap/resize" />
 </selector>
