@@ -103,7 +103,7 @@ public class AutoMatchingInTimeAdapter extends BaseAdapter implements Filterable
         View view;
 
         if (convertView == null){
-            view = View.inflate(context,R.layout.auto_matching_list_unit,null);
+            view = View.inflate(context,R.layout.layout_auto_matching_list_unit,null);
             //用viewHolder存储控件信息
             viewHolder = new ViewHolder();
             viewHolder.image = view.findViewById(R.id.Search_list_history_image);

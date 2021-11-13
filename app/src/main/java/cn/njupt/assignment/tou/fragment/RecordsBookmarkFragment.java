@@ -44,11 +44,11 @@ import cn.njupt.assignment.tou.adapter.MoveToFolderAdapter;
 import cn.njupt.assignment.tou.callback.ToBookmarkCallbackListener;
 import cn.njupt.assignment.tou.callback.ToDialogRecordsCallbackListener;
 import cn.njupt.assignment.tou.callback.ToHomeActivityCallbackListener;
-import cn.njupt.assignment.tou.databinding.AlterBookmarkDialogBinding;
-import cn.njupt.assignment.tou.databinding.BookmarkCheckedMoveToFolderBinding;
-import cn.njupt.assignment.tou.databinding.BookmarkDeleteAffirmDialogBinding;
-import cn.njupt.assignment.tou.databinding.BookmarkNewFolderDialogBinding;
+import cn.njupt.assignment.tou.databinding.LayoutBookmarkEditDialogBinding;
+import cn.njupt.assignment.tou.databinding.LayoutBookmarkCheckedMoveToFolderBinding;
+import cn.njupt.assignment.tou.databinding.LayoutBookmarkDeleteAffirmDialogBinding;
 import cn.njupt.assignment.tou.databinding.FragmentDialogRecordsBookmarkBinding;
+import cn.njupt.assignment.tou.databinding.LayoutBookmarkNewFolderDialogBinding;
 import cn.njupt.assignment.tou.entity.Bookmark;
 import cn.njupt.assignment.tou.viewmodel.BookmarkViewModel;
 
@@ -433,11 +433,11 @@ public class RecordsBookmarkFragment extends Fragment {
      * @date 2021/10/22 20:27
      */
     public void newFolderDialog(Context context){
-        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.bookmark_new_folder_dialog, 900, LinearLayout.LayoutParams.WRAP_CONTENT);
+        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.layout_bookmark_new_folder_dialog, 900, LinearLayout.LayoutParams.WRAP_CONTENT);
         View dialogView = (View) dialogMap.get("dialogView");
         AlertDialog dialog = (AlertDialog) dialogMap.get("dialog");
         //点击事件监听
-        BookmarkNewFolderDialogBinding dialogBinding = BookmarkNewFolderDialogBinding.bind(dialogView);//绑定databinding
+        LayoutBookmarkNewFolderDialogBinding dialogBinding = LayoutBookmarkNewFolderDialogBinding.bind(dialogView);//绑定databinding
         EditText editText = dialogBinding.newFolderName;
         dialogBinding.setNewfolderclick((View v)-> {
             int cancelOrAffirm = v.getId();
@@ -531,13 +531,13 @@ public class RecordsBookmarkFragment extends Fragment {
      * @date 2021/10/22 20:47
      */
     public void moveBookmark(Context context){
-        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.bookmark_checked_move_to_folder, 800, 1000);
+        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.layout_bookmark_checked_move_to_folder, 800, 1000);
         View dialogView = (View) dialogMap.get("dialogView");
         AlertDialog dialog = (AlertDialog) dialogMap.get("dialog");
         //存储所选择的文件夹
         final int[] movetoId = {-1};//-1代表未选中任何文件夹
         //点击事件监听
-        BookmarkCheckedMoveToFolderBinding dialogBinding = BookmarkCheckedMoveToFolderBinding.bind(dialogView);//绑定databinding
+        LayoutBookmarkCheckedMoveToFolderBinding dialogBinding = LayoutBookmarkCheckedMoveToFolderBinding.bind(dialogView);//绑定databinding
         TextView checked_move_to_folder_text = dialogBinding.checkedMoveToFolderText;
         RecyclerView recyclerView = dialogBinding.moveToFolderShow;
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -601,11 +601,11 @@ public class RecordsBookmarkFragment extends Fragment {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     public void loadAlterDialog(Context context, Bookmark bookmarkBean){
-        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.alter_bookmark_dialog, 900, LinearLayout.LayoutParams.WRAP_CONTENT);
+        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.layout_bookmark_edit_dialog, 900, LinearLayout.LayoutParams.WRAP_CONTENT);
         View dialogView = (View) dialogMap.get("dialogView");
         AlertDialog dialog = (AlertDialog) dialogMap.get("dialog");
         //绑定databinding，获取输入的数据
-        AlterBookmarkDialogBinding dialogBinding = AlterBookmarkDialogBinding.bind(dialogView);
+        LayoutBookmarkEditDialogBinding dialogBinding = LayoutBookmarkEditDialogBinding.bind(dialogView);
         EditText alterName = dialogBinding.alterName;
         EditText alterUrl = dialogBinding.alterUrl;
         LinearLayout alter_url_layout = dialogBinding.alterUrlLayout;
@@ -792,11 +792,11 @@ public class RecordsBookmarkFragment extends Fragment {
      * @date 2021/10/22 20:14
      */
     public void deleteAffirm(Context context, List<Bookmark> needDelete, int num, int upper){
-        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.bookmark_delete_affirm_dialog, 800, LinearLayout.LayoutParams.WRAP_CONTENT);
+        Map<String, Object> dialogMap = loadAlertDialog(context, R.layout.layout_bookmark_delete_affirm_dialog, 800, LinearLayout.LayoutParams.WRAP_CONTENT);
         View dialogView = (View) dialogMap.get("dialogView");
         AlertDialog dialog = (AlertDialog) dialogMap.get("dialog");
         //点击事件监听
-        BookmarkDeleteAffirmDialogBinding dialogBinding = BookmarkDeleteAffirmDialogBinding.bind(dialogView);//绑定databinding
+        LayoutBookmarkDeleteAffirmDialogBinding dialogBinding = LayoutBookmarkDeleteAffirmDialogBinding.bind(dialogView);//绑定databinding
         TextView textView = dialogBinding.deleteNum;
         String totalNum = "共计："+needDelete.size();
         textView.setText(totalNum);

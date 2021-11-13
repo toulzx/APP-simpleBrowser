@@ -6,15 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.databinding.BookmarkItemBinding;
+import cn.njupt.assignment.tou.databinding.LayoutBookmarkItemBinding;
 import cn.njupt.assignment.tou.entity.Bookmark;
 
 import java.util.ArrayList;
@@ -88,7 +86,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 //        holder.setIsRecyclable(false); // 为了条目不复用
-        BookmarkItemBinding binding = DataBindingUtil.getBinding(holder.itemView);
+        LayoutBookmarkItemBinding binding = DataBindingUtil.getBinding(holder.itemView);
         Bookmark bookmarkBean = bookmarkList.get(position);
         binding.setBookmark(bookmarkBean);
         binding.setItemclick(itemClick);
@@ -98,7 +96,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.ViewHo
     }
 
     //是否显示复选框
-    public void showCheckBox(BookmarkItemBinding binding, int position, Bookmark bookmark){
+    public void showCheckBox(LayoutBookmarkItemBinding binding, int position, Bookmark bookmark){
         checkBox = binding.checkedItem;
         if (isShowCheckBox == true){
             checkBox.setVisibility(View.VISIBLE);
@@ -172,7 +170,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        BookmarkItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.bookmark_item, parent, false);
+        LayoutBookmarkItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.layout_bookmark_item, parent, false);
         View view = binding.getRoot();
         ViewHolder holder=new ViewHolder(view);
         return holder;

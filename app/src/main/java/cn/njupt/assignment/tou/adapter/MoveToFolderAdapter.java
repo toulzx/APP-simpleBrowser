@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import cn.njupt.assignment.tou.R;
-import cn.njupt.assignment.tou.databinding.BookmarkCheckMoveToFolderItemBinding;
+import cn.njupt.assignment.tou.databinding.LayoutBookmarkCheckMoveToFolderItemBinding;
 import cn.njupt.assignment.tou.entity.Bookmark;
 
 public class MoveToFolderAdapter extends RecyclerView.Adapter<MoveToFolderAdapter.ViewHolder> {
@@ -31,7 +31,7 @@ public class MoveToFolderAdapter extends RecyclerView.Adapter<MoveToFolderAdapte
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        BookmarkCheckMoveToFolderItemBinding binding = DataBindingUtil.getBinding(holder.itemView);
+        LayoutBookmarkCheckMoveToFolderItemBinding binding = DataBindingUtil.getBinding(holder.itemView);
         Bookmark bookmarkBean = bookmarkList.get(position);
         binding.setBookmark(bookmarkBean);
         binding.setItemclick(itemClick);
@@ -46,7 +46,7 @@ public class MoveToFolderAdapter extends RecyclerView.Adapter<MoveToFolderAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        BookmarkCheckMoveToFolderItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.bookmark_check_move_to_folder_item, parent, false);
+        LayoutBookmarkCheckMoveToFolderItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.layout_bookmark_check_move_to_folder_item, parent, false);
         View view = binding.getRoot();
         ViewHolder holder=new ViewHolder(view);
         return holder;
